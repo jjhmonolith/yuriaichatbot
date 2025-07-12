@@ -92,18 +92,14 @@ export default function PromptsPage() {
       
       const data = await response.json();
       if (data.success) {
-        alert(`${name} 프롬프트가 생성되었습니다.`);
+        alert(data.message || `${name} 프롬프트가 초기화되었습니다.`);
         fetchPrompts();
       } else {
-        if (response.status === 409) {
-          alert('이미 존재하는 프롬프트입니다.');
-        } else {
-          alert(`${name} 프롬프트 생성에 실패했습니다.`);
-        }
+        alert(`${name} 프롬프트 초기화에 실패했습니다.`);
       }
     } catch (error) {
       console.error('Initialize individual prompt error:', error);
-      alert(`${name} 프롬프트 생성에 실패했습니다.`);
+      alert(`${name} 프롬프트 초기화에 실패했습니다.`);
     } finally {
       setSaving(false);
     }
