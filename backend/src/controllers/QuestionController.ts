@@ -224,7 +224,7 @@ export class QuestionController {
       // 데이터 정리 및 유효성 검사
       if (updateData.options && Array.isArray(updateData.options)) {
         // 선택지에서 너무 긴 텍스트나 마크다운 제거
-        updateData.options = updateData.options
+        const cleanedOptions = updateData.options
           .map((option: string) => {
             if (typeof option !== 'string') return '';
             // 마크다운 헤더나 너무 긴 텍스트 제거
@@ -235,7 +235,25 @@ export class QuestionController {
           })
           .filter((option: string) => option.length > 0 && option.length <= 200);
         
-        console.log('Cleaned options:', updateData.options);
+        console.log('Cleaned options:', cleanedOptions);
+        
+        // 최소 2개의 유효한 선택지가 있어야 함
+        if (cleanedOptions.length < 2) {
+          return res.status(400).json({
+            success: false,
+            message: '최소 2개의 유효한 선택지가 필요합니다.'
+          });
+        }
+        
+        updateData.options = cleanedOptions;
+        
+        // correctAnswer가 정리된 options에 포함되어 있는지 확인
+        if (updateData.correctAnswer && !cleanedOptions.includes(updateData.correctAnswer)) {
+          return res.status(400).json({
+            success: false,
+            message: '정답이 선택지에 포함되어 있지 않습니다.'
+          });
+        }
       }
       
       let question;
