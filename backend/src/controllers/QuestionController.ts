@@ -231,23 +231,12 @@ export class QuestionController {
         ).populate('setId', 'title setNumber');
         console.log('MongoDB update result:', question ? 'SUCCESS' : 'NOT_FOUND');
       } catch (dbError) {
-        // MongoDB 실패 시 메모리 데이터에서 수정
-        console.log('Using memory storage for update question (MongoDB not available)');
-        const index = memoryQuestions.findIndex(q => q._id.toString() === id);
-        
-        if (index === -1) {
-          return res.status(404).json({
-            success: false,
-            message: 'Question not found'
-          });
-        }
-
-        memoryQuestions[index] = {
-          ...memoryQuestions[index],
-          ...updateData,
-          updatedAt: new Date()
-        };
-        question = memoryQuestions[index];
+        console.error('MongoDB error during update:', dbError);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error during update',
+          error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+        });
       }
 
       if (!question) {
