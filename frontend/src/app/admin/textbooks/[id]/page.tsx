@@ -71,19 +71,32 @@ export default function TextbookDetailPage() {
     }
   };
 
-  const handleDownloadMappingQR = (mappingId: string, qrCode: string) => {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/textbooks/${textbookId}/mappings/${mappingId}/qr-image`;
-    console.log('QR Download URL:', url);
-    console.log('textbookId:', textbookId);
-    console.log('mappingId:', mappingId);
-    console.log('qrCode:', qrCode);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `qr-${qrCode}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadMappingQR = async (mappingId: string, qrCode: string) => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/textbooks/${textbookId}/mappings/${mappingId}/qr-image`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('QR 이미지를 가져올 수 없습니다.');
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `qr-${qrCode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('QR 다운로드 오류:', error);
+      alert('QR 코드 다운로드에 실패했습니다.');
+    }
   };
 
   const handleMoveUp = async (set: PassageSet, index: number) => {

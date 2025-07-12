@@ -76,13 +76,30 @@ export default function PassageSetsPage() {
     }
   };
 
-  const handleDownloadQR = (passageSet: PassageSet) => {
-    const link = document.createElement('a');
-    link.href = `${process.env.NEXT_PUBLIC_API_URL}/admin/passage-sets/${passageSet._id}/qr-image`;
-    link.download = `qr-${passageSet.title}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadQR = async (passageSet: PassageSet) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/passage-sets/${passageSet._id}/qr-image`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('QR 이미지를 가져올 수 없습니다.');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr-${passageSet.title}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('QR 다운로드 오류:', error);
+      alert('QR 코드 다운로드에 실패했습니다.');
+    }
   };
 
   const openEditModal = (passageSet: PassageSet) => {
