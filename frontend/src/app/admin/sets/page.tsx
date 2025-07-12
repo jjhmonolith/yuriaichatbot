@@ -78,7 +78,8 @@ export default function PassageSetsPage() {
 
   const handleDownloadQR = async (passageSet: PassageSet) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/passage-sets/${passageSet._id}/qr-image`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/passage-sets/${passageSet._id}/qr-image`, {
         method: 'GET',
         credentials: 'include',
       });

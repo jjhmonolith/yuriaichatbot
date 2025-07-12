@@ -73,7 +73,8 @@ export default function TextbookDetailPage() {
 
   const handleDownloadMappingQR = async (mappingId: string, qrCode: string) => {
     try {
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/textbooks/${textbookId}/mappings/${mappingId}/qr-image`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const url = `${apiUrl}/admin/textbooks/${textbookId}/mappings/${mappingId}/qr-image`;
       console.log('QR Download URL:', url); // 디버깅용
       
       const response = await fetch(url, {
