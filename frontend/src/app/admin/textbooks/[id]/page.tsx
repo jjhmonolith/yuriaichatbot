@@ -286,32 +286,37 @@ export default function TextbookDetailPage() {
                     key={set._id} 
                     className="border border-gray-200 rounded p-4 hover:bg-gray-50"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{set.title}</h3>
-                        <p className="text-gray-600 text-sm mt-1 truncate">
-                          {set.passage.substring(0, 200)}...
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 mb-2">{set.title}</h3>
+                        <p className="text-gray-600 text-sm mb-3 break-words max-h-16 overflow-hidden">
+                          {set.passage.length > 150 
+                            ? `${set.passage.substring(0, 150)}...` 
+                            : set.passage
+                          }
                         </p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className="font-mono bg-gray-100 px-2 py-1 rounded">
                             {set.qrCode}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-gray-500">
                             생성일: {new Date(set.createdAt).toLocaleDateString()}
                           </span>
                           {set.textbooks && set.textbooks.length > 0 && (
-                            <span className="text-xs text-blue-600">
+                            <span className="text-blue-600">
                               {set.textbooks.length}개 교재에서 사용 중
                             </span>
                           )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleAddPassageSet(set._id)}
-                        className="ml-4 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                      >
-                        추가
-                      </button>
+                      <div className="flex-shrink-0">
+                        <button
+                          onClick={() => handleAddPassageSet(set._id)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 whitespace-nowrap"
+                        >
+                          추가
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
