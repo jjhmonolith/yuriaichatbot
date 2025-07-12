@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, MessageSquare, Save, X, RotateCcw } from 'lucide-react';
+import { Plus, Edit, Trash2, MessageSquare, Save, X, RotateCcw, History, ArrowLeft } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 
@@ -17,20 +17,34 @@ interface SystemPrompt {
   updatedAt: string;
 }
 
+interface PromptVersion {
+  version: number;
+  content: string;
+  createdAt: string;
+  description: string;
+  createdBy?: string;
+  isCurrent: boolean;
+}
+
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<SystemPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingPrompt, setEditingPrompt] = useState<SystemPrompt | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [selectedPromptForVersions, setSelectedPromptForVersions] = useState<SystemPrompt | null>(null);
+  const [versions, setVersions] = useState<PromptVersion[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   // 폼 상태
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
     content: '',
-    isActive: true
+    isActive: true,
+    versionDescription: ''
   });
 
   useEffect(() => {
@@ -123,8 +137,76 @@ export default function PromptsPage() {
       name: '',
       description: '',
       content: '',
-      isActive: true
+      isActive: true,
+      versionDescription: ''
     });
+  };
+
+  // 버전 히스토리 모달 열기
+  const openVersionModal = async (prompt: SystemPrompt) => {
+    setSelectedPromptForVersions(prompt);
+    setLoadingVersions(true);
+    setIsVersionModalOpen(true);
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/system-prompts/versions/${prompt.key}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const allVersions = [data.data.current, ...data.data.versions];
+        setVersions(allVersions);
+      } else {
+        setVersions([]);
+        alert('버전 데이터를 불러오지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('Fetch versions error:', error);
+      setVersions([]);
+      alert('버전 데이터를 불러오지 못했습니다.');
+    } finally {
+      setLoadingVersions(false);
+    }
+  };
+
+  // 버전 히스토리 모달 닫기
+  const closeVersionModal = () => {
+    setIsVersionModalOpen(false);
+    setSelectedPromptForVersions(null);
+    setVersions([]);
+  };
+
+  // 특정 버전으로 되돌리기
+  const revertToVersion = async (version: number) => {
+    if (!selectedPromptForVersions) return;
+    
+    if (!confirm(`버전 ${version}으로 되돌리시겠습니까? 현재 내용이 새로운 버전으로 백업됩니다.`)) {
+      return;
+    }
+    
+    try {
+      setSaving(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/system-prompts/revert/${selectedPromptForVersions.key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert(data.message || `버전 ${version}으로 성공적으로 되돌렸습니다.`);
+        fetchPrompts();
+        closeVersionModal();
+      } else {
+        alert('버전 되돌리기에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Revert version error:', error);
+      alert('버전 되돌리기에 실패했습니다.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async () => {
@@ -188,36 +270,12 @@ export default function PromptsPage() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
-              onClick={() => initializeIndividualPrompt('chat_assistant', 'AI 채팅 어시스턴트')}
-              disabled={saving}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>채팅 프롬프트 초기화</span>
-            </Button>
-            <Button
-              onClick={() => initializeIndividualPrompt('passage_commentary', '지문 해설 생성')}
-              disabled={saving}
-              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>해설 프롬프트 초기화</span>
-            </Button>
-            <Button
-              onClick={() => initializeIndividualPrompt('question_explanation', '문제 해설 생성')}
-              disabled={saving}
-              className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>문제 프롬프트 초기화</span>
-            </Button>
-            <Button
               onClick={initializeDefaultPrompts}
               disabled={saving}
               className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700"
             >
               <RotateCcw className="h-4 w-4" />
-              <span>전체 초기화</span>
+              <span>기본 프롬프트 생성</span>
             </Button>
           </div>
         </div>
@@ -231,30 +289,14 @@ export default function PromptsPage() {
           <p className="mt-1 text-sm text-gray-500">
             기본 프롬프트를 초기화하여 시작해보세요.
           </p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="mt-6">
             <Button 
-              onClick={() => initializeIndividualPrompt('chat_assistant', 'AI 채팅 어시스턴트')} 
+              onClick={initializeDefaultPrompts} 
               disabled={saving}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              채팅 프롬프트 초기화
-            </Button>
-            <Button 
-              onClick={() => initializeIndividualPrompt('passage_commentary', '지문 해설 생성')} 
-              disabled={saving}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              해설 프롬프트 초기화
-            </Button>
-            <Button 
-              onClick={() => initializeIndividualPrompt('question_explanation', '문제 해설 생성')} 
-              disabled={saving}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              문제 프롬프트 초기화
+              기본 프롬프트 생성
             </Button>
           </div>
         </div>
@@ -316,6 +358,13 @@ export default function PromptsPage() {
 
                   <div className="flex items-center space-x-2 ml-4">
                     <button
+                      onClick={() => openVersionModal(prompt)}
+                      className="p-2 text-gray-400 hover:text-purple-600 rounded-lg hover:bg-purple-50"
+                      title="버전 관리"
+                    >
+                      <History className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => openEditModal(prompt)}
                       className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50"
                       title="수정"
@@ -369,9 +418,22 @@ export default function PromptsPage() {
             <textarea
               value={editForm.content}
               onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
-              rows={12}
+              rows={10}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
               placeholder="프롬프트 내용을 입력하세요..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              버전 설명 (선택사항)
+            </label>
+            <input
+              type="text"
+              value={editForm.versionDescription}
+              onChange={(e) => setEditForm(prev => ({ ...prev, versionDescription: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="예: 채팅 응답 업데이트, 버그 수정 등..."
             />
           </div>
 
@@ -402,6 +464,101 @@ export default function PromptsPage() {
             >
               <Save className="h-4 w-4 mr-2" />
               저장
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Version History Modal */}
+      <Modal
+        isOpen={isVersionModalOpen}
+        onClose={closeVersionModal}
+        title={`버전 히스토리: ${selectedPromptForVersions?.name}`}
+        size="xl"
+      >
+        <div className="space-y-4">
+          {loadingVersions ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-gray-500">버전 데이터를 불러오는 중...</div>
+            </div>
+          ) : versions.length === 0 ? (
+            <div className="text-center py-8">
+              <History className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">이전 버전이 없습니다</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                프롬프트를 수정하면 이전 버전이 저장됩니다.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {versions.map((version, index) => (
+                <div
+                  key={`${version.version}-${index}`}
+                  className={`border rounded-lg p-4 ${
+                    version.isCurrent 
+                      ? 'border-blue-300 bg-blue-50' 
+                      : 'border-gray-200 bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className={`text-sm font-medium ${
+                          version.isCurrent ? 'text-blue-800' : 'text-gray-800'
+                        }`}>
+                          버전 {version.version}
+                        </span>
+                        {version.isCurrent && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            현재 버전
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-500">
+                          {new Date(version.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      {version.description && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          {version.description}
+                        </p>
+                      )}
+                      
+                      <div className="bg-gray-50 rounded p-2">
+                        <p className="text-xs font-mono text-gray-700 whitespace-pre-wrap max-h-24 overflow-y-auto">
+                          {version.content.length > 200 
+                            ? `${version.content.substring(0, 200)}...` 
+                            : version.content
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {!version.isCurrent && (
+                      <div className="ml-4">
+                        <Button
+                          onClick={() => revertToVersion(version.version)}
+                          disabled={saving}
+                          className="text-xs bg-purple-600 hover:bg-purple-700"
+                        >
+                          <ArrowLeft className="h-3 w-3 mr-1" />
+                          되돌리기
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div className="flex justify-end pt-4">
+            <Button
+              onClick={closeVersionModal}
+              className="bg-gray-500 hover:bg-gray-600"
+            >
+              <X className="h-4 w-4 mr-2" />
+              닫기
             </Button>
           </div>
         </div>
