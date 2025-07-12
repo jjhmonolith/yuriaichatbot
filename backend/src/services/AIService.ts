@@ -64,7 +64,12 @@ export class AIService {
 
       return aiResponse;
     } catch (error) {
-      console.error('OpenAI API error:', error);
+      console.error('OpenAI API error details:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        hasApiKey: !!process.env.OPENAI_API_KEY,
+        apiKeyLength: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0
+      });
       
       // API 오류 시 더미 응답으로 폴백
       return this.generateDummyResponse(userMessage, passageData);
@@ -73,7 +78,8 @@ export class AIService {
 
   // 시스템 프롬프트 구성
   private static buildSystemPrompt(passageData: any): string {
-    const { textbook, set, questions } = passageData;
+    const { textbooks, set, questions } = passageData;
+    const textbook = textbooks && textbooks.length > 0 ? textbooks[0] : { title: '교재', subject: '일반', level: '기본' };
     
     const questionsText = questions.map((q: any, index: number) => 
       `문제 ${q.questionNumber}: ${q.questionText}
