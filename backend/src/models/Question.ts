@@ -42,13 +42,8 @@ const questionSchema = new Schema<IQuestion>(
     correctAnswer: {
       type: String,
       required: [true, 'Correct answer is required'],
-      trim: true,
-      validate: {
-        validator: function(this: IQuestion, answer: string) {
-          return this.options.includes(answer);
-        },
-        message: 'Correct answer must be one of the options'
-      }
+      trim: true
+      // validator 제거 - 컨트롤러에서 검증
     },
     explanation: {
       type: String,
