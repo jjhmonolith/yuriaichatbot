@@ -221,6 +221,68 @@ ${questionsText}
 (현재는 데모 모드로, OpenAI API 연동 시 더 정확한 답변이 제공됩니다)`;
   }
 
+  // 해설 생성을 위한 전용 메서드
+  static async generateCommentaryWithPrompt(systemPrompt: string): Promise<string> {
+    const client = this.getClient();
+    
+    // OpenAI API가 설정되지 않은 경우 더미 응답
+    if (!client) {
+      return this.generateDummyCommentary();
+    }
+
+    try {
+      // OpenAI API 호출
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt }
+        ],
+        max_tokens: 1000, // 해설이므로 더 긴 응답 허용
+        temperature: 0.7,
+        presence_penalty: 0.1,
+        frequency_penalty: 0.1,
+      });
+
+      const commentary = response.choices[0]?.message?.content;
+      if (!commentary) {
+        throw new Error('AI 해설을 받을 수 없습니다.');
+      }
+
+      return commentary;
+    } catch (error) {
+      console.error('OpenAI API error for commentary:', error);
+      
+      // API 오류 시 더미 응답으로 폴백
+      return this.generateDummyCommentary();
+    }
+  }
+
+  // 더미 해설 생성 (OpenAI API가 없을 때)
+  private static generateDummyCommentary(): string {
+    return `이 지문은 교육적 가치가 높은 내용을 담고 있습니다.
+
+## 주요 내용 분석
+
+### 전체 주제
+이 지문의 핵심 주제는 인간의 삶과 가치에 대한 깊이 있는 탐구입니다. 작가는 일상적인 소재를 통해 보편적인 인간의 경험을 형상화하고 있습니다.
+
+### 구성과 전개
+- **도입부**: 상황 설정과 인물 소개
+- **전개부**: 갈등의 구체화와 심화
+- **절정부**: 갈등의 최고조 달성
+- **결말부**: 갈등 해결과 주제 의식 구현
+
+### 표현 기법
+- **서술 시점**: 효과적인 시점 활용으로 독자의 몰입도 증대
+- **인물 형상화**: 입체적이고 현실적인 인물 창조
+- **배경 설정**: 주제 의식을 뒷받침하는 적절한 배경
+
+### 문학적 의의
+이 작품은 현대 사회의 문제를 예리하게 포착하여 독자들에게 깊은 성찰의 기회를 제공합니다.
+
+**※ 현재는 데모 모드입니다. OpenAI API 연동 시 더 정확하고 상세한 해설이 제공됩니다.**`;
+  }
+
   // 사용 통계 (나중에 구현)
   static async getUsageStats(): Promise<any> {
     // TODO: 사용량 통계 구현

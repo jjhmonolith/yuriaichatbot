@@ -9,6 +9,7 @@ import setQuestionsRouter from './admin/set-questions';
 import passageSetsRouter from './admin/passage-sets';
 import textbookMappingsRouter from './admin/textbook-mappings';
 import systemPromptsRouter from './admin/system-prompts';
+import commentaryGeneratorRouter from './admin/commentary-generator';
 
 // Chat routes
 import chatRouter from './chat';
@@ -46,6 +47,7 @@ router.use('/admin/passage-sets', passageSetsRouter); // NEW
 router.use('/admin/sets/:setId/questions', setQuestionsRouter);
 router.use('/admin/questions', questionsRouter);
 router.use('/admin/system-prompts', systemPromptsRouter);
+router.use('/admin/commentary-generator', commentaryGeneratorRouter);
 
 // Chat routes (for students)
 router.use('/chat', chatRouter);
