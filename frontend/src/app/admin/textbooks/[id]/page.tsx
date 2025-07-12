@@ -74,6 +74,7 @@ export default function TextbookDetailPage() {
   const handleDownloadMappingQR = async (mappingId: string, qrCode: string) => {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/admin/textbooks/${textbookId}/mappings/${mappingId}/qr-image`;
+      console.log('QR Download URL:', url); // 디버깅용
       
       const response = await fetch(url, {
         method: 'GET',
@@ -81,7 +82,7 @@ export default function TextbookDetailPage() {
       });
       
       if (!response.ok) {
-        throw new Error('QR 이미지를 가져올 수 없습니다.');
+        throw new Error(`QR 이미지를 가져올 수 없습니다. Status: ${response.status}`);
       }
       
       const blob = await response.blob();
