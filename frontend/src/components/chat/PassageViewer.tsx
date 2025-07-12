@@ -94,7 +94,19 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                 {set?.passageComment && (
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <h3 className="text-sm font-medium text-blue-900 mb-2">지문 해설</h3>
-                    <div className="text-sm prose prose-sm max-w-none prose-headings:text-blue-900 prose-p:text-blue-800 prose-strong:text-blue-900 prose-em:text-blue-700 prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:rounded prose-ul:text-blue-800 prose-ol:text-blue-800 prose-li:text-blue-800">
+                    <div className="text-sm prose prose-sm max-w-none 
+                      prose-headings:text-blue-900 prose-headings:font-bold
+                      prose-h1:text-base prose-h1:mb-2 prose-h1:mt-3
+                      prose-h2:text-sm prose-h2:mb-2 prose-h2:mt-3  
+                      prose-h3:text-xs prose-h3:mb-1 prose-h3:mt-2 prose-h3:font-semibold
+                      prose-p:text-blue-800 prose-p:mb-2 prose-p:leading-relaxed
+                      prose-strong:text-blue-900 prose-strong:font-bold
+                      prose-em:text-blue-700 prose-em:italic
+                      prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
+                      prose-ul:text-blue-800 prose-ul:mb-2 prose-ul:pl-4
+                      prose-ol:text-blue-800 prose-ol:mb-2 prose-ol:pl-4  
+                      prose-li:text-blue-800 prose-li:mb-1
+                      prose-blockquote:border-l-4 prose-blockquote:border-blue-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-blue-600">
                       <ReactMarkdown>{set.passageComment}</ReactMarkdown>
                     </div>
                   </div>
@@ -132,7 +144,19 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                     {question.explanation && (
                       <div className="bg-purple-50 p-2 rounded">
                         <div className="text-xs font-medium text-purple-900 mb-1">해설:</div>
-                        <div className="text-xs prose prose-xs max-w-none prose-headings:text-purple-900 prose-p:text-purple-800 prose-strong:text-purple-900 prose-em:text-purple-700 prose-code:text-purple-600 prose-code:bg-purple-100 prose-code:px-1 prose-code:rounded prose-ul:text-purple-800 prose-ol:text-purple-800 prose-li:text-purple-800">
+                        <div className="text-xs prose prose-xs max-w-none 
+                          prose-headings:text-purple-900 prose-headings:font-bold
+                          prose-h1:text-sm prose-h1:mb-1 prose-h1:mt-2
+                          prose-h2:text-xs prose-h2:mb-1 prose-h2:mt-2  
+                          prose-h3:text-xs prose-h3:mb-1 prose-h3:mt-1 prose-h3:font-semibold
+                          prose-p:text-purple-800 prose-p:mb-1 prose-p:leading-relaxed
+                          prose-strong:text-purple-900 prose-strong:font-bold
+                          prose-em:text-purple-700 prose-em:italic
+                          prose-code:text-purple-600 prose-code:bg-purple-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
+                          prose-ul:text-purple-800 prose-ul:mb-1 prose-ul:pl-3
+                          prose-ol:text-purple-800 prose-ol:mb-1 prose-ol:pl-3  
+                          prose-li:text-purple-800 prose-li:mb-0.5
+                          prose-blockquote:border-l-4 prose-blockquote:border-purple-300 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-purple-600">
                           <ReactMarkdown>{question.explanation}</ReactMarkdown>
                         </div>
                       </div>

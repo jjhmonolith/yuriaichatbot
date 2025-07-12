@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Plus, Edit, Trash2, HelpCircle, Search } from 'lucide-react';
 import { useQuestions } from '@/hooks/useQuestions';
 import { usePassageSets } from '@/hooks/usePassageSets';
@@ -223,9 +224,22 @@ export default function QuestionsPage() {
                     </div>
 
                     <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <span className="font-medium">해설:</span> {question.explanation}
-                      </p>
+                      <div className="text-sm font-medium text-blue-900 mb-1">해설:</div>
+                      <div className="text-sm prose prose-sm max-w-none 
+                        prose-headings:text-blue-900 prose-headings:font-bold
+                        prose-h1:text-base prose-h1:mb-2 prose-h1:mt-3
+                        prose-h2:text-sm prose-h2:mb-2 prose-h2:mt-3  
+                        prose-h3:text-sm prose-h3:mb-1 prose-h3:mt-2 prose-h3:font-semibold
+                        prose-p:text-blue-800 prose-p:mb-2 prose-p:leading-relaxed
+                        prose-strong:text-blue-900 prose-strong:font-bold
+                        prose-em:text-blue-700 prose-em:italic
+                        prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
+                        prose-ul:text-blue-800 prose-ul:mb-2 prose-ul:pl-4
+                        prose-ol:text-blue-800 prose-ol:mb-2 prose-ol:pl-4  
+                        prose-li:text-blue-800 prose-li:mb-1
+                        prose-blockquote:border-l-4 prose-blockquote:border-blue-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-blue-600">
+                        <ReactMarkdown>{question.explanation}</ReactMarkdown>
+                      </div>
                     </div>
                   </div>
 
