@@ -121,12 +121,8 @@ export default function TextbookDetailPage() {
       const textbookTitle = textbook?.title || '교재';
       const safeTextbookName = textbookTitle.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
 
-      // 매핑 QR 코드들 다운로드
-      const mappingFolder = zip.folder('교재용_QR');
-      const independentFolder = zip.folder('독립용_QR');
-
+      // 교재용 QR 코드들만 다운로드
       for (const set of mappedSets) {
-        // 교재용 QR 코드 (매핑 QR)
         if (set.mappingQrCode && set.mappingId) {
           try {
             const mappingUrl = `${apiUrl}/admin/textbooks/${textbookId}/mappings/${set.mappingId}/qr-image`;
@@ -138,28 +134,11 @@ export default function TextbookDetailPage() {
             if (mappingResponse.ok) {
               const mappingBlob = await mappingResponse.blob();
               const safePassageName = set.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
-              mappingFolder?.file(`${safePassageName}_교재용_${set.mappingQrCode}.png`, mappingBlob);
+              zip.file(`${safePassageName}_qr.png`, mappingBlob);
             }
           } catch (error) {
-            console.error(`매핑 QR 다운로드 실패 (${set.title}):`, error);
+            console.error(`QR 다운로드 실패 (${set.title}):`, error);
           }
-        }
-
-        // 독립용 QR 코드
-        try {
-          const independentUrl = `${apiUrl}/admin/passage-sets/${set._id}/qr-image`;
-          const independentResponse = await fetch(independentUrl, {
-            method: 'GET',
-            credentials: 'include',
-          });
-          
-          if (independentResponse.ok) {
-            const independentBlob = await independentResponse.blob();
-            const safePassageName = set.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
-            independentFolder?.file(`${safePassageName}_독립용_${set.qrCode}.png`, independentBlob);
-          }
-        } catch (error) {
-          console.error(`독립 QR 다운로드 실패 (${set.title}):`, error);
         }
       }
 
@@ -168,7 +147,7 @@ export default function TextbookDetailPage() {
       const zipUrl = window.URL.createObjectURL(zipBlob);
       const link = document.createElement('a');
       link.href = zipUrl;
-      link.download = `${safeTextbookName}_QR코드_모음.zip`;
+      link.download = `${safeTextbookName}_QR코드.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
