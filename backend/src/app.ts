@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5001;
 // CORS configuration for production and development
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://frontend-ro4uidzct-jjhlegos-projects.vercel.app', 'https://frontend-pdd7mcrim-jjhlegos-projects.vercel.app', 'https://frontend-oygbg0lww-jjhlegos-projects.vercel.app', 'https://frontend-1nlltanmh-jjhlegos-projects.vercel.app', 'https://frontend-naw1eeq3c-jjhlegos-projects.vercel.app', process.env.CORS_ORIGIN, process.env.FRONTEND_URL].filter((url): url is string => Boolean(url))
+    ? ['https://frontend-kq34bi1gn-jjhlegos-projects.vercel.app', 'https://frontend-ro4uidzct-jjhlegos-projects.vercel.app', 'https://frontend-pdd7mcrim-jjhlegos-projects.vercel.app', 'https://frontend-oygbg0lww-jjhlegos-projects.vercel.app', 'https://frontend-1nlltanmh-jjhlegos-projects.vercel.app', 'https://frontend-naw1eeq3c-jjhlegos-projects.vercel.app', process.env.CORS_ORIGIN, process.env.FRONTEND_URL].filter((url): url is string => Boolean(url))
     : true, // 개발 환경에서는 모든 origin 허용
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
