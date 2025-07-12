@@ -22,7 +22,7 @@ export class QRService {
 
   // QR 코드 URL 생성
   static generateQRCodeUrl(qrCode: string): string {
-    const baseUrl = process.env.QR_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.QR_BASE_URL || 'https://yuriaichatbot-frontend.vercel.app';
     return `${baseUrl}/chat/${qrCode}`;
   }
 
