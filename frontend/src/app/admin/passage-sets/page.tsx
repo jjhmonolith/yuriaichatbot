@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePassageSets } from '@/hooks/usePassageSets';
 import { PassageSet } from '@/types/common';
+import { Sparkles, Loader2 } from 'lucide-react';
 
 export default function PassageSetsPage() {
   const { passageSets, loading, error, createPassageSet, updatePassageSet, deletePassageSet, regenerateQRCode } = usePassageSets();
@@ -196,6 +197,59 @@ function PassageSetModal({
     passage: passageSet?.passage || '',
     passageComment: passageSet?.passageComment || '',
   });
+  
+  const [isGeneratingCommentary, setIsGeneratingCommentary] = useState(false);
+
+  const handleGenerateCommentary = async () => {
+    // 제목과 지문 내용이 있는지 확인
+    if (!formData.title.trim()) {
+      alert('지문 제목을 먼저 입력해주세요.');
+      return;
+    }
+    
+    if (!formData.passage.trim()) {
+      alert('지문 내용을 먼저 입력해주세요.');
+      return;
+    }
+
+    try {
+      setIsGeneratingCommentary(true);
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/commentary-generator/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          passage: formData.passage,
+          existingCommentary: formData.passageComment, // 기존 해설이 있으면 참고용으로 전달
+          subject: '국어',
+          level: '고등학교'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // AI가 생성한 해설로 대체
+        setFormData(prev => ({ 
+          ...prev, 
+          passageComment: data.data.commentary 
+        }));
+        
+        alert('해설이 성공적으로 생성되었습니다! 필요시 수정하여 사용하세요.');
+      } else {
+        throw new Error(data.message || '해설 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Commentary generation error:', error);
+      alert('해설 생성에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsGeneratingCommentary(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,16 +294,63 @@ function PassageSetModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              지문 해설
-            </label>
-            <textarea
-              value={formData.passageComment}
-              onChange={(e) => setFormData(prev => ({ ...prev, passageComment: e.target.value }))}
-              className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
-              rows={4}
-              required
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                지문 해설
+              </label>
+              <button
+                type="button"
+                onClick={handleGenerateCommentary}
+                disabled={isGeneratingCommentary || !formData.title.trim() || !formData.passage.trim()}
+                className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white text-sm px-3 py-1.5 rounded"
+              >
+                {isGeneratingCommentary ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>생성 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    <span>AI 해설 생성</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="relative">
+              <textarea
+                value={formData.passageComment}
+                onChange={(e) => setFormData(prev => ({ ...prev, passageComment: e.target.value }))}
+                disabled={isGeneratingCommentary}
+                className={`w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 ${
+                  isGeneratingCommentary ? 'bg-gray-50' : ''
+                }`}
+                rows={6}
+                placeholder="지문에 대한 상세한 해설을 입력하거나 'AI 해설 생성' 버튼을 클릭하세요."
+                required
+              />
+              {isGeneratingCommentary && (
+                <div className="absolute inset-0 bg-gray-50 bg-opacity-75 flex items-center justify-center rounded">
+                  <div className="flex items-center space-x-2 text-purple-600">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm font-medium">AI가 해설을 생성 중입니다...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            {!formData.title.trim() || !formData.passage.trim() ? (
+              <p className="mt-1 text-xs text-gray-500">
+                💡 AI 해설 생성을 위해 지문 제목과 내용을 먼저 입력해주세요.
+              </p>
+            ) : formData.passageComment.trim() ? (
+              <p className="mt-1 text-xs text-blue-600">
+                💡 기존 해설이 있어 AI가 이를 참고하여 개선된 해설을 생성합니다.
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-green-600">
+                ✨ AI 해설 생성 준비가 완료되었습니다.
+              </p>
+            )}
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
