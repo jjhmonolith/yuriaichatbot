@@ -44,8 +44,8 @@ router.use('/admin/textbooks/:textbookId/mappings', textbookMappingsRouter); // 
 router.use('/admin/textbooks', textbooksRouter);
 router.use('/admin/sets', setsRouter); // LEGACY
 router.use('/admin/passage-sets', passageSetsRouter); // NEW
+router.use('/admin/questions', questionsRouter); // 더 구체적인 경로를 먼저
 router.use('/admin/sets/:setId/questions', setQuestionsRouter);
-router.use('/admin/questions', questionsRouter);
 router.use('/admin/system-prompts', systemPromptsRouter);
 router.use('/admin/commentary-generator', commentaryGeneratorRouter);
 
