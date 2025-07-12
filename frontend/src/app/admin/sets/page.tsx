@@ -96,8 +96,9 @@ export default function PassageSetsPage() {
       // 파일명: 교재명_지문세트명_qr.png
       const textbookTitle = (passageSet.textbookId as any)?.title || '독립지문';
       const passageTitle = passageSet.title;
-      const safeTextbookName = textbookTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
-      const safePassageName = passageTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
+      // 한글, 영문, 숫자, 하이픈만 유지하고 특수문자와 공백만 제거
+      const safeTextbookName = textbookTitle.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
+      const safePassageName = passageTitle.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
       link.download = `${safeTextbookName}_${safePassageName}_qr.png`;
       document.body.appendChild(link);
       link.click();
