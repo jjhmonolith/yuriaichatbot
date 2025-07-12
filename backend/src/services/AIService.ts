@@ -237,7 +237,7 @@ ${questionsText}
         messages: [
           { role: 'system', content: systemPrompt }
         ],
-        max_tokens: 1000, // 해설이므로 더 긴 응답 허용
+        max_tokens: 2000, // 해설이므로 더 긴 응답 허용 (약 1500-1800자)
         temperature: 0.7,
         presence_penalty: 0.1,
         frequency_penalty: 0.1,
