@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePassageSets } from '@/hooks/usePassageSets';
 import { PassageSet } from '@/types/common';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, HelpCircle, ExternalLink } from 'lucide-react';
 
 export default function PassageSetsPage() {
   const { passageSets, loading, error, createPassageSet, updatePassageSet, deletePassageSet, regenerateQRCode } = usePassageSets();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSet, setSelectedSet] = useState<PassageSet | null>(null);
+  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
 
   const handleCreate = async (data: any) => {
     try {
@@ -61,6 +63,40 @@ export default function PassageSetsPage() {
     }
   };
 
+  // 문제 개수 가져오기
+  useEffect(() => {
+    const fetchQuestionCounts = async () => {
+      if (!passageSets || passageSets.length === 0) return;
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const counts: Record<string, number> = {};
+      
+      try {
+        await Promise.all(
+          passageSets.map(async (set) => {
+            try {
+              const response = await fetch(`${apiUrl}/admin/sets/${set._id}/questions`);
+              const data = await response.json();
+              if (data.success) {
+                counts[set._id] = data.data.questions?.length || 0;
+              } else {
+                counts[set._id] = 0;
+              }
+            } catch (error) {
+              console.error(`Failed to fetch questions for set ${set._id}:`, error);
+              counts[set._id] = 0;
+            }
+          })
+        );
+        setQuestionCounts(counts);
+      } catch (error) {
+        console.error('Failed to fetch question counts:', error);
+      }
+    };
+    
+    fetchQuestionCounts();
+  }, [passageSets]);
+
   if (loading) return <div className="p-6">로딩 중...</div>;
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
@@ -85,6 +121,9 @@ export default function PassageSetsPage() {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 사용 교재
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                문제 수
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 QR 코드
@@ -119,6 +158,20 @@ export default function PassageSetsPage() {
                     ) : (
                       <span className="text-gray-400">사용 안함</span>
                     )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-900">
+                      {questionCounts[set._id] !== undefined ? questionCounts[set._id] : '-'}개
+                    </span>
+                    <Link 
+                      href={`/admin/passage-sets/${set._id}/questions`}
+                      className="inline-flex items-center text-xs text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded"
+                    >
+                      <HelpCircle className="h-3 w-3 mr-1" />
+                      문제 관리
+                    </Link>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
