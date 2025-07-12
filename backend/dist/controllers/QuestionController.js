@@ -19,8 +19,12 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuestionController = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const models_1 = require("../models");
 // 임시 메모리 저장소
 let memoryQuestions = [];
@@ -212,24 +216,61 @@ class QuestionController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { id } = req.params;
+                console.log('UPDATE QUESTION - ID:', id, 'Update data:', req.body);
+                // ObjectId 유효성 검사
+                if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+                    console.log('Invalid ObjectId:', id);
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Invalid question ID format'
+                    });
+                }
                 // questionNumber, setId는 수정하지 않음
                 const _a = req.body, { questionNumber, setId } = _a, updateData = __rest(_a, ["questionNumber", "setId"]);
-                let question;
-                try {
-                    question = yield models_1.Question.findByIdAndUpdate(id, updateData, { new: true, runValidators: true }).populate('setId', 'title setNumber');
-                }
-                catch (dbError) {
-                    // MongoDB 실패 시 메모리 데이터에서 수정
-                    console.log('Using memory storage for update question (MongoDB not available)');
-                    const index = memoryQuestions.findIndex(q => q._id.toString() === id);
-                    if (index === -1) {
-                        return res.status(404).json({
+                // 데이터 정리 및 유효성 검사
+                if (updateData.options && Array.isArray(updateData.options)) {
+                    // 선택지에서 너무 긴 텍스트나 마크다운 제거
+                    const cleanedOptions = updateData.options
+                        .map((option) => {
+                        if (typeof option !== 'string')
+                            return '';
+                        // 마크다운 헤더나 너무 긴 텍스트 제거
+                        if (option.includes('###') || option.includes('**') || option.length > 200) {
+                            return '';
+                        }
+                        return option.trim();
+                    })
+                        .filter((option) => option.length > 0 && option.length <= 200);
+                    console.log('Cleaned options:', cleanedOptions);
+                    // 최소 2개의 유효한 선택지가 있어야 함
+                    if (cleanedOptions.length < 2) {
+                        return res.status(400).json({
                             success: false,
-                            message: 'Question not found'
+                            message: '최소 2개의 유효한 선택지가 필요합니다.'
                         });
                     }
-                    memoryQuestions[index] = Object.assign(Object.assign(Object.assign({}, memoryQuestions[index]), updateData), { updatedAt: new Date() });
-                    question = memoryQuestions[index];
+                    updateData.options = cleanedOptions;
+                    // correctAnswer가 정리된 options에 포함되어 있는지 확인
+                    if (updateData.correctAnswer && !cleanedOptions.includes(updateData.correctAnswer)) {
+                        return res.status(400).json({
+                            success: false,
+                            message: '정답이 선택지에 포함되어 있지 않습니다.'
+                        });
+                    }
+                }
+                let question;
+                try {
+                    console.log('Attempting MongoDB update for question ID:', id);
+                    question = yield models_1.Question.findByIdAndUpdate(id, updateData, { new: true, runValidators: true }).populate('setId', 'title setNumber');
+                    console.log('MongoDB update result:', question ? 'SUCCESS' : 'NOT_FOUND');
+                }
+                catch (dbError) {
+                    console.error('MongoDB error during update:', dbError);
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Database error during update',
+                        error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+                    });
                 }
                 if (!question) {
                     return res.status(404).json({

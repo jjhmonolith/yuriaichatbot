@@ -20,11 +20,24 @@ const routes_1 = __importDefault(require("./routes"));
 // Load environment variables
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 // CORS configuration for production and development
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
-        ? [process.env.CORS_ORIGIN, process.env.FRONTEND_URL].filter((url) => Boolean(url))
+        ? [
+            // 프로덕션 도메인 (환경변수로 관리)
+            process.env.FRONTEND_URL || 'https://yuriaichatbot-frontend.vercel.app',
+            // Vercel 미리보기 도메인들 (임시)
+            'https://frontend-xi-weld-26.vercel.app',
+            'https://frontend-kq34bi1gn-jjhlegos-projects.vercel.app',
+            'https://frontend-ro4uidzct-jjhlegos-projects.vercel.app',
+            'https://frontend-pdd7mcrim-jjhlegos-projects.vercel.app',
+            'https://frontend-oygbg0lww-jjhlegos-projects.vercel.app',
+            'https://frontend-1nlltanmh-jjhlegos-projects.vercel.app',
+            'https://frontend-naw1eeq3c-jjhlegos-projects.vercel.app',
+            // 추가 환경변수
+            process.env.CORS_ORIGIN
+        ].filter((url) => Boolean(url))
         : true, // 개발 환경에서는 모든 origin 허용
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -12,4 +12,8 @@ router.delete('/:id', SystemPromptController.deletePrompt);
 router.post('/initialize', SystemPromptController.initializeDefaultPrompts);
 router.post('/initialize/:key', SystemPromptController.initializePrompt);
 
+// 버전 관리 라우트
+router.get('/versions/:key', SystemPromptController.getPromptVersions);
+router.post('/revert/:key', SystemPromptController.revertToVersion);
+
 export default router;

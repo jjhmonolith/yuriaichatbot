@@ -103,36 +103,61 @@ router.post('/:qrCode/message', (req, res) => __awaiter(void 0, void 0, void 0, 
     try {
         const { qrCode } = req.params;
         const { message, context } = req.body;
-        // 지문세트 조회
-        const passageSet = yield models_1.PassageSet.findOne({ qrCode });
-        if (!passageSet) {
-            return res.status(404).json({
+        // QR 코드 타입 확인
+        const qrType = QRService_1.QRService.getQRCodeType(qrCode);
+        let passageSet = null;
+        let chatTextbooks = [];
+        if (qrType === 'mapping') {
+            // 매핑 QR 코드: 특정 교재-지문 매핑 조회
+            const mapping = yield models_1.TextbookPassageMapping.findOne({ qrCode })
+                .populate('textbookId', 'title subject level')
+                .populate('passageSetId');
+            if (!mapping) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Textbook-passage mapping not found'
+                });
+            }
+            passageSet = mapping.passageSetId;
+            chatTextbooks = [mapping.textbookId]; // 특정 교재만
+        }
+        else if (qrType === 'passageSet') {
+            // 지문세트 QR 코드: 독립 지문세트 조회
+            passageSet = yield models_1.PassageSet.findOne({ qrCode });
+            if (!passageSet) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Passage set not found'
+                });
+            }
+            // 해당 지문세트와 연결된 모든 교재 목록 조회
+            const mappings = yield models_1.TextbookPassageMapping.find({
+                passageSetId: passageSet._id
+            })
+                .populate('textbookId', 'title subject level')
+                .sort({ order: 1 });
+            chatTextbooks = mappings.map(mapping => ({
+                _id: mapping.textbookId._id,
+                title: mapping.textbookId.title,
+                subject: mapping.textbookId.subject,
+                level: mapping.textbookId.level,
+                order: mapping.order
+            }));
+        }
+        else {
+            return res.status(400).json({
                 success: false,
-                message: 'Passage set not found'
+                message: 'Invalid QR code format'
             });
         }
-        // 해당 지문세트와 연결된 교재 목록 조회
-        const mappings = yield models_1.TextbookPassageMapping.find({
-            passageSetId: passageSet._id
-        })
-            .populate('textbookId', 'title subject level')
-            .sort({ order: 1 });
         // 해당 지문세트의 문제들 조회
         const questions = yield models_1.Question.find({ setId: passageSet._id })
             .sort({ questionNumber: 1 })
             .select('-createdAt -updatedAt');
-        // 사용된 교재 목록 구성
-        const textbooks = mappings.map(mapping => ({
-            _id: mapping.textbookId._id,
-            title: mapping.textbookId.title,
-            subject: mapping.textbookId.subject,
-            level: mapping.textbookId.level,
-            order: mapping.order
-        }));
         // 지문 데이터 구성
         const passageData = {
             qrCode: passageSet.qrCode,
-            textbooks: textbooks, // 복수의 교재 정보
+            textbooks: chatTextbooks, // 복수의 교재 정보
             set: {
                 _id: passageSet._id,
                 title: passageSet.title,
@@ -142,7 +167,13 @@ router.post('/:qrCode/message', (req, res) => __awaiter(void 0, void 0, void 0, 
             questions: questions
         };
         // AI 응답 생성
+        console.log('Chat request received:', {
+            qrCode,
+            message: message.substring(0, 50) + '...',
+            hasOpenAI: !!process.env.OPENAI_API_KEY
+        });
         const aiResponse = yield AIService_1.AIService.generateResponse(message, passageData, (context === null || context === void 0 ? void 0 : context.previousMessages) || []);
+        console.log('AI Response generated:', aiResponse.substring(0, 100) + '...');
         const response = {
             success: true,
             data: {

@@ -34,7 +34,8 @@ class QRService {
     }
     // QR 코드 URL 생성
     static generateQRCodeUrl(qrCode) {
-        const baseUrl = process.env.QR_BASE_URL || 'http://localhost:3000';
+        // 환경변수로 도메인 관리 (도메인 변경 시 환경변수만 수정)
+        const baseUrl = process.env.QR_BASE_URL || process.env.FRONTEND_URL || 'https://yuriaichatbot-frontend.vercel.app';
         return `${baseUrl}/chat/${qrCode}`;
     }
     // QR 코드 이미지 생성 (Base64)

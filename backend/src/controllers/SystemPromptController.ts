@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { SystemPrompt } from '../models';
+import { SystemPromptVersion } from '../models/SystemPromptVersion';
 
 export class SystemPromptController {
   // 모든 시스템 프롬프트 조회
@@ -98,11 +99,11 @@ export class SystemPromptController {
     }
   }
 
-  // 프롬프트 수정
+  // 프롬프트 수정 (버전 히스토리 저장)
   static async updatePrompt(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { name, description, content, isActive } = req.body;
+      const { name, description, content, isActive, versionDescription } = req.body;
 
       const prompt = await SystemPrompt.findById(id);
       if (!prompt) {
@@ -112,7 +113,17 @@ export class SystemPromptController {
         });
       }
 
-      // 버전 증가
+      // 현재 버전을 히스토리에 저장
+      const currentVersion = new SystemPromptVersion({
+        promptKey: prompt.key,
+        content: prompt.content,
+        version: prompt.version,
+        description: versionDescription || `Version ${prompt.version} backup`,
+        createdBy: 'admin'
+      });
+      await currentVersion.save();
+
+      // 프롬프트 업데이트
       prompt.name = name || prompt.name;
       prompt.description = description || prompt.description;
       prompt.content = content || prompt.content;
@@ -121,10 +132,21 @@ export class SystemPromptController {
 
       await prompt.save();
 
+      // 오래된 버전 정리 (최근 10개만 유지)
+      const allVersions = await SystemPromptVersion.find({ promptKey: prompt.key })
+        .sort({ version: -1 });
+      
+      if (allVersions.length > 10) {
+        const versionsToDelete = allVersions.slice(10);
+        await SystemPromptVersion.deleteMany({
+          _id: { $in: versionsToDelete.map(v => v._id) }
+        });
+      }
+
       res.json({
         success: true,
         data: prompt,
-        message: 'System prompt updated successfully'
+        message: `System prompt updated successfully (v${prompt.version})`
       });
     } catch (error) {
       console.error('Update prompt error:', error);
@@ -288,6 +310,112 @@ export class SystemPromptController {
       res.status(500).json({
         success: false,
         message: 'Failed to initialize prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 프롬프트 버전 히스토리 조회
+  static async getPromptVersions(req: Request, res: Response) {
+    try {
+      const { key } = req.params;
+      
+      // 현재 활성 프롬프트 확인
+      const currentPrompt = await SystemPrompt.findOne({ key });
+      if (!currentPrompt) {
+        return res.status(404).json({
+          success: false,
+          message: 'System prompt not found'
+        });
+      }
+
+      // 최근 10개 버전 조회
+      const versions = await SystemPromptVersion.find({ promptKey: key })
+        .sort({ version: -1 })
+        .limit(10);
+
+      res.json({
+        success: true,
+        data: {
+          current: {
+            version: currentPrompt.version,
+            content: currentPrompt.content,
+            createdAt: currentPrompt.updatedAt,
+            description: 'Current version',
+            isCurrent: true
+          },
+          versions: versions.map(v => ({
+            version: v.version,
+            content: v.content,
+            createdAt: v.createdAt,
+            description: v.description,
+            createdBy: v.createdBy,
+            isCurrent: false
+          }))
+        }
+      });
+    } catch (error) {
+      console.error('Get prompt versions error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch prompt versions',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 특정 버전으로 되돌리기
+  static async revertToVersion(req: Request, res: Response) {
+    try {
+      const { key } = req.params;
+      const { version } = req.body;
+      
+      // 현재 프롬프트 확인
+      const currentPrompt = await SystemPrompt.findOne({ key });
+      if (!currentPrompt) {
+        return res.status(404).json({
+          success: false,
+          message: 'System prompt not found'
+        });
+      }
+
+      // 되돌릴 버전 찾기
+      const targetVersion = await SystemPromptVersion.findOne({ 
+        promptKey: key, 
+        version: version 
+      });
+      if (!targetVersion) {
+        return res.status(404).json({
+          success: false,
+          message: 'Target version not found'
+        });
+      }
+
+      // 현재 버전을 히스토리에 저장
+      const currentBackup = new SystemPromptVersion({
+        promptKey: currentPrompt.key,
+        content: currentPrompt.content,
+        version: currentPrompt.version,
+        description: `Backup before reverting to v${version}`,
+        createdBy: 'admin'
+      });
+      await currentBackup.save();
+
+      // 프롬프트를 선택한 버전으로 업데이트
+      currentPrompt.content = targetVersion.content;
+      currentPrompt.version = currentPrompt.version + 1;
+      await currentPrompt.save();
+
+      res.json({
+        success: true,
+        data: currentPrompt,
+        message: `Reverted to version ${version} (now v${currentPrompt.version})`
+      });
+    } catch (error) {
+      console.error('Revert to version error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to revert to version',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

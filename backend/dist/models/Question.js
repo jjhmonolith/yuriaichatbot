@@ -64,13 +64,8 @@ const questionSchema = new mongoose_1.Schema({
     correctAnswer: {
         type: String,
         required: [true, 'Correct answer is required'],
-        trim: true,
-        validate: {
-            validator: function (answer) {
-                return this.options.includes(answer);
-            },
-            message: 'Correct answer must be one of the options'
-        }
+        trim: true
+        // validator 제거 - 컨트롤러에서 검증
     },
     explanation: {
         type: String,
