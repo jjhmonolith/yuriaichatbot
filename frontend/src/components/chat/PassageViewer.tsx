@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChevronDown, ChevronUp, BookOpen, HelpCircle } from 'lucide-react';
 
 interface PassageViewerProps {
@@ -93,9 +94,9 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                 {set?.passageComment && (
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <h3 className="text-sm font-medium text-blue-900 mb-2">지문 해설</h3>
-                    <p className="text-sm text-blue-800 leading-relaxed">
-                      {set.passageComment}
-                    </p>
+                    <div className="text-sm prose prose-sm max-w-none prose-headings:text-blue-900 prose-p:text-blue-800 prose-strong:text-blue-900 prose-em:text-blue-700 prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:rounded prose-ul:text-blue-800 prose-ol:text-blue-800 prose-li:text-blue-800">
+                      <ReactMarkdown>{set.passageComment}</ReactMarkdown>
+                    </div>
                   </div>
                 )}
               </div>
@@ -129,8 +130,11 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                     </div>
 
                     {question.explanation && (
-                      <div className="bg-purple-50 p-2 rounded text-xs text-purple-800">
-                        <strong>해설:</strong> {question.explanation}
+                      <div className="bg-purple-50 p-2 rounded">
+                        <div className="text-xs font-medium text-purple-900 mb-1">해설:</div>
+                        <div className="text-xs prose prose-xs max-w-none prose-headings:text-purple-900 prose-p:text-purple-800 prose-strong:text-purple-900 prose-em:text-purple-700 prose-code:text-purple-600 prose-code:bg-purple-100 prose-code:px-1 prose-code:rounded prose-ul:text-purple-800 prose-ol:text-purple-800 prose-li:text-purple-800">
+                          <ReactMarkdown>{question.explanation}</ReactMarkdown>
+                        </div>
                       </div>
                     )}
                   </div>

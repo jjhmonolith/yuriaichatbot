@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/storage';
 import { Bot, User } from 'lucide-react';
 
@@ -39,9 +40,15 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md'
             : 'bg-white border border-gray-200 text-gray-900 rounded-bl-md shadow-sm'
         }`}>
-          <p className="text-sm whitespace-pre-wrap break-words">
-            {message.content}
-          </p>
+          {isUser ? (
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {message.content}
+            </p>
+          ) : (
+            <div className="text-sm prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-900 prose-strong:text-gray-900 prose-em:text-gray-700 prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:rounded prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          )}
           
           {/* Timestamp */}
           <div className={`text-xs mt-1 ${
