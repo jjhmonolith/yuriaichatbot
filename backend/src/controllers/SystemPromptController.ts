@@ -1,0 +1,274 @@
+import { Request, Response } from 'express';
+import { SystemPrompt } from '../models';
+
+export class SystemPromptController {
+  // 모든 시스템 프롬프트 조회
+  static async getAllPrompts(req: Request, res: Response) {
+    try {
+      const prompts = await SystemPrompt.find()
+        .sort({ key: 1 });
+
+      res.json({
+        success: true,
+        data: {
+          prompts,
+          pagination: {
+            current: 1,
+            total: 1,
+            count: prompts.length,
+            totalItems: prompts.length
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Get all prompts error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch system prompts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 특정 프롬프트 조회
+  static async getPromptByKey(req: Request, res: Response) {
+    try {
+      const { key } = req.params;
+      
+      const prompt = await SystemPrompt.findOne({ key, isActive: true });
+      
+      if (!prompt) {
+        return res.status(404).json({
+          success: false,
+          message: 'System prompt not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: prompt
+      });
+    } catch (error) {
+      console.error('Get prompt by key error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch system prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 프롬프트 생성
+  static async createPrompt(req: Request, res: Response) {
+    try {
+      const { key, name, description, content } = req.body;
+
+      // 키 중복 확인
+      const existingPrompt = await SystemPrompt.findOne({ key });
+      if (existingPrompt) {
+        return res.status(400).json({
+          success: false,
+          message: 'Prompt with this key already exists'
+        });
+      }
+
+      const prompt = new SystemPrompt({
+        key,
+        name,
+        description,
+        content,
+        isActive: true,
+        version: 1
+      });
+
+      await prompt.save();
+
+      res.status(201).json({
+        success: true,
+        data: prompt,
+        message: 'System prompt created successfully'
+      });
+    } catch (error) {
+      console.error('Create prompt error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create system prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 프롬프트 수정
+  static async updatePrompt(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { name, description, content, isActive } = req.body;
+
+      const prompt = await SystemPrompt.findById(id);
+      if (!prompt) {
+        return res.status(404).json({
+          success: false,
+          message: 'System prompt not found'
+        });
+      }
+
+      // 버전 증가
+      prompt.name = name || prompt.name;
+      prompt.description = description || prompt.description;
+      prompt.content = content || prompt.content;
+      prompt.isActive = isActive !== undefined ? isActive : prompt.isActive;
+      prompt.version = prompt.version + 1;
+
+      await prompt.save();
+
+      res.json({
+        success: true,
+        data: prompt,
+        message: 'System prompt updated successfully'
+      });
+    } catch (error) {
+      console.error('Update prompt error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update system prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 프롬프트 삭제
+  static async deletePrompt(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const prompt = await SystemPrompt.findById(id);
+      if (!prompt) {
+        return res.status(404).json({
+          success: false,
+          message: 'System prompt not found'
+        });
+      }
+
+      await SystemPrompt.findByIdAndDelete(id);
+
+      res.json({
+        success: true,
+        message: 'System prompt deleted successfully'
+      });
+    } catch (error) {
+      console.error('Delete prompt error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete system prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 기본 프롬프트 초기화
+  static async initializeDefaultPrompts(req: Request, res: Response) {
+    try {
+      const defaultPrompts = [
+        {
+          key: 'chat_assistant',
+          name: 'AI 채팅 어시스턴트',
+          description: '학생과의 채팅에서 사용되는 메인 시스템 프롬프트',
+          content: `당신은 {subject} 전문 AI 학습 도우미입니다.
+
+# 학습 자료 정보
+- 교재: {textbook_title} ({subject} - {level})
+- 지문 제목: {passage_title}
+
+# 지문 내용
+{passage_content}
+
+# 지문 해설
+{passage_comment}
+
+# 관련 문제
+{questions}
+
+# 역할과 지침
+1. 학생의 질문에 교육적이고 이해하기 쉽게 답변해주세요
+2. 지문의 내용과 관련된 질문에 중점을 두어 답변하세요
+3. 문제 풀이를 요청하면 단계적으로 설명해주세요
+4. 어려운 개념은 구체적인 예시를 들어 설명해주세요
+5. 학생의 수준({level})에 맞는 언어로 설명해주세요
+6. 답변은 500자 이내로 간결하게 작성해주세요
+7. 친근하고 격려하는 톤으로 대화해주세요
+
+학생이 질문하면 위 자료를 바탕으로 정확하고 도움이 되는 답변을 제공해주세요.`
+        },
+        {
+          key: 'passage_commentary',
+          name: '지문 해설 생성',
+          description: '지문 내용을 바탕으로 자동으로 해설을 생성하는 프롬프트',
+          content: `주어진 지문을 분석하여 학습자를 위한 상세한 해설을 작성해주세요.
+
+# 지문 정보
+- 제목: {passage_title}
+- 과목: {subject}
+- 수준: {level}
+
+# 지문 내용
+{passage_content}
+
+# 해설 작성 지침
+1. 전체 주제와 핵심 메시지를 명확히 제시
+2. 문단별로 주요 내용과 논리적 흐름 설명
+3. 중요한 개념이나 용어에 대한 설명 포함
+4. 학습자가 이해하기 쉬운 언어로 작성
+5. 문학 작품의 경우 배경, 갈등, 주제의식 등 분석
+6. 비문학의 경우 논증 구조, 핵심 개념 등 분석
+
+해설은 학습자의 수준({level})에 맞게 작성하되, 깊이 있는 이해를 도울 수 있도록 구체적이고 명확하게 작성해주세요.`
+        },
+        {
+          key: 'question_explanation',
+          name: '문제 해설 생성',
+          description: '문제와 선택지를 바탕으로 자동으로 해설을 생성하는 프롬프트',
+          content: `주어진 문제에 대한 상세한 해설을 작성해주세요.
+
+# 문제 정보
+- 지문: {passage_content}
+- 문제: {question_text}
+- 선택지: {options}
+- 정답: {correct_answer}
+
+# 해설 작성 지침
+1. 정답을 명확히 제시하고 그 이유를 설명
+2. 각 선택지가 왜 정답이거나 오답인지 분석
+3. 지문의 어느 부분을 근거로 하는지 구체적으로 제시
+4. 문제 해결을 위한 사고 과정을 단계별로 설명
+5. 유사한 문제를 풀 때 적용할 수 있는 방법론 제시
+6. 학습자가 실수하기 쉬운 부분에 대한 주의사항
+
+해설은 논리적이고 체계적으로 작성하여 학습자의 이해를 돕고, 유사한 문제에 응용할 수 있는 능력을 기를 수 있도록 해주세요.`
+        }
+      ];
+
+      const results = [];
+      for (const promptData of defaultPrompts) {
+        const existingPrompt = await SystemPrompt.findOne({ key: promptData.key });
+        if (!existingPrompt) {
+          const prompt = new SystemPrompt(promptData);
+          await prompt.save();
+          results.push(prompt);
+        }
+      }
+
+      res.json({
+        success: true,
+        data: results,
+        message: `${results.length} default prompts initialized`
+      });
+    } catch (error) {
+      console.error('Initialize default prompts error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to initialize default prompts',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+}

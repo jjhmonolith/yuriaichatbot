@@ -10,7 +10,8 @@ import {
   Home, 
   Search,
   Settings,
-  Users
+  Users,
+  MessageSquare
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -22,6 +23,7 @@ const navigation = [
   { name: '교재 관리', href: '/admin/textbooks', icon: BookOpen },
   { name: '지문세트 관리', href: '/admin/passage-sets', icon: FileText },
   { name: '문제 관리', href: '/admin/questions', icon: HelpCircle },
+  { name: '프롬프트 관리', href: '/admin/prompts', icon: MessageSquare },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

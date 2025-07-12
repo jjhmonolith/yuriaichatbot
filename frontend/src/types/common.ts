@@ -72,6 +72,18 @@ export interface ChatSession {
   lastActivity: number;
 }
 
+export interface SystemPrompt {
+  _id: string;
+  key: string;
+  name: string;
+  description: string;
+  content: string;
+  isActive: boolean;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface APIResponse<T> {
   success: boolean;
   data: T;

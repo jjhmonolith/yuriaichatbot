@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { SystemPrompt } from '../models';
 
 export class AIService {
   private static openai: OpenAI | null = null;
@@ -28,7 +29,7 @@ export class AIService {
 
     try {
       // 시스템 프롬프트 구성
-      const systemPrompt = this.buildSystemPrompt(passageData);
+      const systemPrompt = await this.buildSystemPrompt(passageData);
       
       // 대화 히스토리 구성
       const messages: any[] = [
@@ -77,7 +78,74 @@ export class AIService {
   }
 
   // 시스템 프롬프트 구성
-  private static buildSystemPrompt(passageData: any): string {
+  private static async buildSystemPrompt(passageData: any): Promise<string> {
+    try {
+      // 데이터베이스에서 채팅 어시스턴트 프롬프트 가져오기
+      const promptDoc = await SystemPrompt.findOne({ 
+        key: 'chat_assistant', 
+        isActive: true 
+      });
+
+      let promptTemplate = promptDoc?.content;
+      
+      // 프롬프트가 없으면 기본 프롬프트 사용
+      if (!promptTemplate) {
+        promptTemplate = `당신은 {subject} 전문 AI 학습 도우미입니다.
+
+# 학습 자료 정보
+- 교재: {textbook_title} ({subject} - {level})
+- 지문 제목: {passage_title}
+
+# 지문 내용
+{passage_content}
+
+# 지문 해설
+{passage_comment}
+
+# 관련 문제
+{questions}
+
+# 역할과 지침
+1. 학생의 질문에 교육적이고 이해하기 쉽게 답변해주세요
+2. 지문의 내용과 관련된 질문에 중점을 두어 답변하세요
+3. 문제 풀이를 요청하면 단계적으로 설명해주세요
+4. 어려운 개념은 구체적인 예시를 들어 설명해주세요
+5. 학생의 수준({level})에 맞는 언어로 설명해주세요
+6. 답변은 500자 이내로 간결하게 작성해주세요
+7. 친근하고 격려하는 톤으로 대화해주세요
+
+학생이 질문하면 위 자료를 바탕으로 정확하고 도움이 되는 답변을 제공해주세요.`;
+      }
+
+      // 변수 치환
+      const { textbooks, set, questions } = passageData;
+      const textbook = textbooks && textbooks.length > 0 ? textbooks[0] : { title: '교재', subject: '일반', level: '기본' };
+      
+      const questionsText = questions.map((q: any, index: number) => 
+        `문제 ${q.questionNumber}: ${q.questionText}
+선택지: ${q.options.join(', ')}
+정답: ${q.correctAnswer}
+해설: ${q.explanation}`
+      ).join('\n\n');
+
+      return promptTemplate
+        .replace(/{subject}/g, textbook.subject)
+        .replace(/{textbook_title}/g, textbook.title)
+        .replace(/{level}/g, textbook.level)
+        .replace(/{passage_title}/g, set.title)
+        .replace(/{passage_content}/g, set.passage)
+        .replace(/{passage_comment}/g, set.passageComment)
+        .replace(/{questions}/g, questionsText);
+        
+    } catch (error) {
+      console.error('Error building system prompt:', error);
+      // 오류 시 기본 프롬프트 반환
+      return this.buildFallbackPrompt(passageData);
+    }
+  }
+
+  // 폴백 프롬프트 (오류 시 사용)
+  private static buildFallbackPrompt(passageData: any): string {
     const { textbooks, set, questions } = passageData;
     const textbook = textbooks && textbooks.length > 0 ? textbooks[0] : { title: '교재', subject: '일반', level: '기본' };
     
