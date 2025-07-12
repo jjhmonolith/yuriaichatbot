@@ -257,23 +257,31 @@ export class SystemPromptController {
         });
       }
 
-      // 기존 프롬프트 확인
+      // 기존 프롬프트 확인 및 초기화
       const existingPrompt = await SystemPrompt.findOne({ key });
+      
+      let prompt;
       if (existingPrompt) {
-        return res.status(409).json({
-          success: false,
-          message: 'Prompt already exists'
-        });
+        // 기존 프롬프트를 기본값으로 초기화
+        existingPrompt.name = promptData.name;
+        existingPrompt.description = promptData.description;
+        existingPrompt.content = promptData.content;
+        existingPrompt.isActive = true;
+        existingPrompt.version = existingPrompt.version + 1;
+        await existingPrompt.save();
+        prompt = existingPrompt;
+      } else {
+        // 새 프롬프트 생성
+        prompt = new SystemPrompt(promptData);
+        await prompt.save();
       }
-
-      // 새 프롬프트 생성
-      const prompt = new SystemPrompt(promptData);
-      await prompt.save();
 
       res.json({
         success: true,
         data: prompt,
-        message: `${prompt.name} prompt initialized successfully`
+        message: existingPrompt 
+          ? `${prompt.name} 프롬프트가 기본값으로 초기화되었습니다 (v${prompt.version})`
+          : `${prompt.name} 프롬프트가 생성되었습니다`
       });
     } catch (error) {
       console.error('Initialize prompt error:', error);
