@@ -220,6 +220,24 @@ export class QuestionController {
       
       // questionNumber, setId는 수정하지 않음
       const { questionNumber, setId, ...updateData } = req.body;
+      
+      // 데이터 정리 및 유효성 검사
+      if (updateData.options && Array.isArray(updateData.options)) {
+        // 선택지에서 너무 긴 텍스트나 마크다운 제거
+        updateData.options = updateData.options
+          .map((option: string) => {
+            if (typeof option !== 'string') return '';
+            // 마크다운 헤더나 너무 긴 텍스트 제거
+            if (option.includes('###') || option.includes('**') || option.length > 200) {
+              return '';
+            }
+            return option.trim();
+          })
+          .filter((option: string) => option.length > 0 && option.length <= 200);
+        
+        console.log('Cleaned options:', updateData.options);
+      }
+      
       let question;
       
       try {
