@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { Question, PassageSet } from '../models';
 
 // 임시 메모리 저장소
@@ -206,17 +207,29 @@ export class QuestionController {
   static async updateQuestion(req: Request, res: Response) {
     try {
       const { id } = req.params;
+      console.log('UPDATE QUESTION - ID:', id, 'Update data:', req.body);
+      
+      // ObjectId 유효성 검사
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.log('Invalid ObjectId:', id);
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid question ID format'
+        });
+      }
       
       // questionNumber, setId는 수정하지 않음
       const { questionNumber, setId, ...updateData } = req.body;
       let question;
       
       try {
+        console.log('Attempting MongoDB update for question ID:', id);
         question = await Question.findByIdAndUpdate(
           id,
           updateData,
           { new: true, runValidators: true }
         ).populate('setId', 'title setNumber');
+        console.log('MongoDB update result:', question ? 'SUCCESS' : 'NOT_FOUND');
       } catch (dbError) {
         // MongoDB 실패 시 메모리 데이터에서 수정
         console.log('Using memory storage for update question (MongoDB not available)');
