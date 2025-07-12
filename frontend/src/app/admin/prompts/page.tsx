@@ -81,6 +81,34 @@ export default function PromptsPage() {
     }
   };
 
+  const initializeIndividualPrompt = async (key: string, name: string) => {
+    try {
+      setSaving(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/system-prompts/initialize/${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert(`${name} 프롬프트가 생성되었습니다.`);
+        fetchPrompts();
+      } else {
+        if (response.status === 409) {
+          alert('이미 존재하는 프롬프트입니다.');
+        } else {
+          alert(`${name} 프롬프트 생성에 실패했습니다.`);
+        }
+      }
+    } catch (error) {
+      console.error('Initialize individual prompt error:', error);
+      alert(`${name} 프롬프트 생성에 실패했습니다.`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const openEditModal = (prompt: SystemPrompt) => {
     setEditingPrompt(prompt);
     setEditForm({
@@ -162,14 +190,40 @@ export default function PromptsPage() {
               AI 챗봇의 시스템 프롬프트를 관리하고 수정합니다.
             </p>
           </div>
-          <Button
-            onClick={initializeDefaultPrompts}
-            disabled={saving}
-            className="flex items-center space-x-2"
-          >
-            <RotateCcw className="h-4 w-4" />
-            <span>기본 프롬프트 초기화</span>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={() => initializeIndividualPrompt('chat_assistant', 'AI 채팅 어시스턴트')}
+              disabled={saving}
+              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>채팅 프롬프트 초기화</span>
+            </Button>
+            <Button
+              onClick={() => initializeIndividualPrompt('passage_commentary', '지문 해설 생성')}
+              disabled={saving}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>해설 프롬프트 초기화</span>
+            </Button>
+            <Button
+              onClick={() => initializeIndividualPrompt('question_explanation', '문제 해설 생성')}
+              disabled={saving}
+              className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>문제 프롬프트 초기화</span>
+            </Button>
+            <Button
+              onClick={initializeDefaultPrompts}
+              disabled={saving}
+              className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700"
+            >
+              <RotateCcw className="h-4 w-4" />
+              <span>전체 초기화</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -181,10 +235,30 @@ export default function PromptsPage() {
           <p className="mt-1 text-sm text-gray-500">
             기본 프롬프트를 초기화하여 시작해보세요.
           </p>
-          <div className="mt-6">
-            <Button onClick={initializeDefaultPrompts} disabled={saving}>
+          <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+            <Button 
+              onClick={() => initializeIndividualPrompt('chat_assistant', 'AI 채팅 어시스턴트')} 
+              disabled={saving}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               <RotateCcw className="h-4 w-4 mr-2" />
-              기본 프롬프트 초기화
+              채팅 프롬프트 초기화
+            </Button>
+            <Button 
+              onClick={() => initializeIndividualPrompt('passage_commentary', '지문 해설 생성')} 
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              해설 프롬프트 초기화
+            </Button>
+            <Button 
+              onClick={() => initializeIndividualPrompt('question_explanation', '문제 해설 생성')} 
+              disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              문제 프롬프트 초기화
             </Button>
           </div>
         </div>
