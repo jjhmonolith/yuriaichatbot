@@ -78,7 +78,7 @@ export default function PassageSetsPage() {
               const response = await fetch(`${apiUrl}/admin/sets/${set._id}/questions`);
               const data = await response.json();
               if (data.success) {
-                counts[set._id] = data.data.questions?.length || 0;
+                counts[set._id] = data.data?.length || 0;
               } else {
                 counts[set._id] = 0;
               }

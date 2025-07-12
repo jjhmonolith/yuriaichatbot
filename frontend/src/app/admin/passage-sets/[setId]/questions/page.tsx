@@ -58,7 +58,7 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
       const questionsData = await questionsResponse.json();
       
       if (questionsData.success) {
-        setQuestions(questionsData.data.questions || []);
+        setQuestions(questionsData.data || []);
       } else {
         setQuestions([]);
       }
