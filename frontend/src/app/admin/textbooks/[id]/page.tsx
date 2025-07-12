@@ -90,7 +90,13 @@ export default function TextbookDetailPage() {
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `qr-${qrCode}.png`;
+      
+      // 파일명: 교재명_지문세트명_qr.png (매핑 QR용)
+      const textbookTitle = textbook?.title || '교재';
+      const passageTitle = mappedSets.find(set => set.mappingId === mappingId)?.title || '지문세트';
+      const safeTextbookName = textbookTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
+      const safePassageName = passageTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
+      link.download = `${safeTextbookName}_${safePassageName}_qr.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

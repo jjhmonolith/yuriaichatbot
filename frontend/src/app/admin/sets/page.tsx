@@ -92,7 +92,13 @@ export default function PassageSetsPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `qr-${passageSet.title}.png`;
+      
+      // 파일명: 교재명_지문세트명_qr.png
+      const textbookTitle = (passageSet.textbookId as any)?.title || '독립지문';
+      const passageTitle = passageSet.title;
+      const safeTextbookName = textbookTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
+      const safePassageName = passageTitle.replace(/[^\w\s-가-힣]/g, '').replace(/\s+/g, '_');
+      link.download = `${safeTextbookName}_${safePassageName}_qr.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
