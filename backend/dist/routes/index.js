@@ -14,6 +14,7 @@ const passage_sets_1 = __importDefault(require("./admin/passage-sets"));
 const textbook_mappings_1 = __importDefault(require("./admin/textbook-mappings"));
 const system_prompts_1 = __importDefault(require("./admin/system-prompts"));
 const commentary_generator_1 = __importDefault(require("./admin/commentary-generator"));
+const dashboard_1 = __importDefault(require("./admin/dashboard"));
 // Chat routes
 const chat_1 = __importDefault(require("./chat"));
 const router = (0, express_1.Router)();
@@ -44,6 +45,7 @@ router.use('/admin/questions', questions_1.default); // 더 구체적인 경로�
 router.use('/admin/sets/:setId/questions', set_questions_1.default);
 router.use('/admin/system-prompts', system_prompts_1.default);
 router.use('/admin/commentary-generator', commentary_generator_1.default);
+router.use('/admin/dashboard', dashboard_1.default);
 // Chat routes (for students)
 router.use('/chat', chat_1.default);
 // 404 handler

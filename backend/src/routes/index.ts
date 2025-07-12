@@ -10,6 +10,7 @@ import passageSetsRouter from './admin/passage-sets';
 import textbookMappingsRouter from './admin/textbook-mappings';
 import systemPromptsRouter from './admin/system-prompts';
 import commentaryGeneratorRouter from './admin/commentary-generator';
+import dashboardRouter from './admin/dashboard';
 
 // Chat routes
 import chatRouter from './chat';
@@ -48,6 +49,7 @@ router.use('/admin/questions', questionsRouter); // 더 구체적인 경로를 �
 router.use('/admin/sets/:setId/questions', setQuestionsRouter);
 router.use('/admin/system-prompts', systemPromptsRouter);
 router.use('/admin/commentary-generator', commentaryGeneratorRouter);
+router.use('/admin/dashboard', dashboardRouter);
 
 // Chat routes (for students)
 router.use('/chat', chatRouter);
