@@ -151,11 +151,19 @@ router.post('/:qrCode/message', async (req, res) => {
     };
 
     // AI 응답 생성
+    console.log('Chat request received:', {
+      qrCode,
+      message: message.substring(0, 50) + '...',
+      hasOpenAI: !!process.env.OPENAI_API_KEY
+    });
+    
     const aiResponse = await AIService.generateResponse(
       message,
       passageData,
       context?.previousMessages || []
     );
+    
+    console.log('AI Response generated:', aiResponse.substring(0, 100) + '...');
 
     const response = {
       success: true,
