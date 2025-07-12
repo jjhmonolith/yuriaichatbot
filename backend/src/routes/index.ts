@@ -24,6 +24,17 @@ router.get('/health', (req, res) => {
   });
 });
 
+// Debug endpoint to check environment variables (임시)
+router.get('/debug/env', (req, res) => {
+  res.json({
+    hasOpenAI: !!process.env.OPENAI_API_KEY,
+    openAIKeyLength: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0,
+    envKeys: Object.keys(process.env).filter(key => 
+      key.includes('OPENAI') || key.includes('API')
+    )
+  });
+});
+
 
 // Admin routes - specific routes first
 router.use('/admin/textbooks/:textbookId/sets', textbookSetsRouter); // LEGACY
