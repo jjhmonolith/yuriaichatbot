@@ -45,19 +45,19 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               {message.content}
             </p>
           ) : (
-            <div className="text-sm prose prose-sm max-w-none 
-              prose-headings:text-gray-900 prose-headings:font-bold
-              prose-h1:text-lg prose-h1:mb-2 prose-h1:mt-3
-              prose-h2:text-base prose-h2:mb-2 prose-h2:mt-3  
-              prose-h3:text-sm prose-h3:mb-1 prose-h3:mt-2 prose-h3:font-semibold
-              prose-p:text-gray-900 prose-p:mb-2 prose-p:leading-relaxed
-              prose-strong:text-gray-900 prose-strong:font-bold
-              prose-em:text-gray-700 prose-em:italic
-              prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
-              prose-ul:text-gray-900 prose-ul:mb-2 prose-ul:pl-4
-              prose-ol:text-gray-900 prose-ol:mb-2 prose-ol:pl-4  
-              prose-li:text-gray-900 prose-li:mb-1
-              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600">
+            <div className="prose max-w-none [&>*]:text-sm
+              [&>h1]:text-xl [&>h1]:font-bold [&>h1]:text-gray-900 [&>h1]:mb-3 [&>h1]:mt-4
+              [&>h2]:text-lg [&>h2]:font-bold [&>h2]:text-gray-900 [&>h2]:mb-2 [&>h2]:mt-3  
+              [&>h3]:text-base [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mb-2 [&>h3]:mt-3
+              [&>h4]:text-sm [&>h4]:font-semibold [&>h4]:text-gray-900 [&>h4]:mb-1 [&>h4]:mt-2
+              [&>p]:text-sm [&>p]:text-gray-900 [&>p]:mb-2 [&>p]:leading-relaxed
+              [&>strong]:font-bold [&>strong]:text-gray-900
+              [&>em]:italic [&>em]:text-gray-700
+              [&>code]:text-xs [&>code]:text-purple-600 [&>code]:bg-purple-50 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
+              [&>ul]:text-sm [&>ul]:text-gray-900 [&>ul]:mb-2 [&>ul]:pl-6
+              [&>ol]:text-sm [&>ol]:text-gray-900 [&>ol]:mb-2 [&>ol]:pl-6  
+              [&>li]:text-gray-900 [&>li]:mb-1
+              [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:text-sm">
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
           )}
