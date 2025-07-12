@@ -260,6 +260,7 @@ export default function QuestionsPage() {
         size="lg"
       >
         <QuestionForm
+          passageSet={selectedSet}
           onSubmit={handleCreate}
           onCancel={() => setIsCreateModalOpen(false)}
           loading={formLoading}
@@ -279,6 +280,7 @@ export default function QuestionsPage() {
         {editingQuestion && (
           <QuestionForm
             question={editingQuestion}
+            passageSet={selectedSet}
             onSubmit={handleEdit}
             onCancel={() => {
               setIsEditModalOpen(false);

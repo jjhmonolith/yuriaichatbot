@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Question } from '@/types/common';
+import { Question, PassageSet } from '@/types/common';
 import Button from '@/components/ui/Button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Sparkles, Loader2 } from 'lucide-react';
 
 interface QuestionFormProps {
   question?: Question;
+  passageSet?: PassageSet; // AI 해설 생성을 위해 지문세트 정보 필요
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
@@ -14,6 +15,7 @@ interface QuestionFormProps {
 
 export default function QuestionForm({ 
   question, 
+  passageSet,
   onSubmit, 
   onCancel, 
   loading = false 
@@ -26,6 +28,7 @@ export default function QuestionForm({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -90,6 +93,75 @@ export default function QuestionForm({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleGenerateExplanation = async () => {
+    // 필수 정보가 있는지 확인
+    if (!formData.questionText.trim()) {
+      alert('문제를 먼저 입력해주세요.');
+      return;
+    }
+    
+    const validOptions = formData.options.filter(option => option.trim());
+    if (validOptions.length < 2) {
+      alert('최소 2개의 선택지를 입력해주세요.');
+      return;
+    }
+    
+    if (!formData.correctAnswer.trim()) {
+      alert('정답을 먼저 선택해주세요.');
+      return;
+    }
+    
+    if (!passageSet) {
+      alert('지문 정보를 불러올 수 없습니다.');
+      return;
+    }
+
+    try {
+      setIsGeneratingExplanation(true);
+      
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/commentary-generator/generate-question`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          passageContent: passageSet.passage,
+          questionText: formData.questionText,
+          options: validOptions,
+          correctAnswer: formData.correctAnswer,
+          existingExplanation: formData.explanation, // 기존 해설이 있으면 참고용으로 전달
+          subject: '국어',
+          level: '고등학교'
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // AI가 생성한 해설로 대체
+        setFormData(prev => ({ 
+          ...prev, 
+          explanation: data.data.explanation 
+        }));
+        
+        // 해설 필드 에러가 있었다면 제거
+        if (errors.explanation) {
+          setErrors(prev => ({ ...prev, explanation: '' }));
+        }
+        
+        alert('문제 해설이 성공적으로 생성되었습니다! 필요시 수정하여 사용하세요.');
+      } else {
+        throw new Error(data.message || '문제 해설 생성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Question explanation generation error:', error);
+      alert('문제 해설 생성에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsGeneratingExplanation(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -215,9 +287,34 @@ export default function QuestionForm({
 
       {/* 해설 */}
       <div>
-        <label htmlFor="explanation" className="block text-sm font-medium text-gray-700">
-          해설 *
-        </label>
+        <div className="flex items-center justify-between mb-2">
+          <label htmlFor="explanation" className="block text-sm font-medium text-gray-700">
+            해설 *
+          </label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleGenerateExplanation}
+            disabled={isGeneratingExplanation || !formData.questionText.trim() || !formData.correctAnswer.trim() || !passageSet}
+            className="flex items-center space-x-1 text-purple-600 hover:text-purple-700"
+          >
+            {isGeneratingExplanation ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            <span>{isGeneratingExplanation ? '생성 중...' : 'AI 해설 생성'}</span>
+          </Button>
+        </div>
+        
+        {/* 도움말 텍스트 */}
+        {(!formData.questionText.trim() || !formData.correctAnswer.trim() || !passageSet) && (
+          <p className="text-xs text-gray-500 mb-2">
+            문제와 정답을 입력한 후 AI 해설을 생성할 수 있습니다.
+          </p>
+        )}
+        
         <textarea
           name="explanation"
           id="explanation"
