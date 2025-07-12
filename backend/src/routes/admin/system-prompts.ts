@@ -10,5 +10,6 @@ router.post('/', SystemPromptController.createPrompt);
 router.put('/:id', SystemPromptController.updatePrompt);
 router.delete('/:id', SystemPromptController.deletePrompt);
 router.post('/initialize', SystemPromptController.initializeDefaultPrompts);
+router.post('/initialize/:key', SystemPromptController.initializePrompt);
 
 export default router;

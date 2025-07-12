@@ -165,11 +165,13 @@ export class SystemPromptController {
     }
   }
 
-  // 기본 프롬프트 초기화
-  static async initializeDefaultPrompts(req: Request, res: Response) {
+  // 특정 프롬프트 초기화
+  static async initializePrompt(req: Request, res: Response) {
     try {
-      const defaultPrompts = [
-        {
+      const { key } = req.params;
+      
+      const defaultPrompts: Record<string, any> = {
+        'chat_assistant': {
           key: 'chat_assistant',
           name: 'AI 채팅 어시스턴트',
           description: '학생과의 채팅에서 사용되는 메인 시스템 프롬프트',
@@ -199,7 +201,7 @@ export class SystemPromptController {
 
 학생이 질문하면 위 자료를 바탕으로 정확하고 도움이 되는 답변을 제공해주세요.`
         },
-        {
+        'passage_commentary': {
           key: 'passage_commentary',
           name: '지문 해설 생성',
           description: '지문 내용을 바탕으로 자동으로 해설을 생성하는 프롬프트',
@@ -223,7 +225,7 @@ export class SystemPromptController {
 
 해설은 학습자의 수준({level})에 맞게 작성하되, 깊이 있는 이해를 도울 수 있도록 구체적이고 명확하게 작성해주세요.`
         },
-        {
+        'question_explanation': {
           key: 'question_explanation',
           name: '문제 해설 생성',
           description: '문제와 선택지를 바탕으로 자동으로 해설을 생성하는 프롬프트',
@@ -245,22 +247,151 @@ export class SystemPromptController {
 
 해설은 논리적이고 체계적으로 작성하여 학습자의 이해를 돕고, 유사한 문제에 응용할 수 있는 능력을 기를 수 있도록 해주세요.`
         }
-      ];
+      };
 
+      const promptData = defaultPrompts[key];
+      if (!promptData) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid prompt key'
+        });
+      }
+
+      // 기존 프롬프트 확인
+      const existingPrompt = await SystemPrompt.findOne({ key });
+      if (existingPrompt) {
+        return res.status(409).json({
+          success: false,
+          message: 'Prompt already exists'
+        });
+      }
+
+      // 새 프롬프트 생성
+      const prompt = new SystemPrompt(promptData);
+      await prompt.save();
+
+      res.json({
+        success: true,
+        data: prompt,
+        message: `${prompt.name} prompt initialized successfully`
+      });
+    } catch (error) {
+      console.error('Initialize prompt error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to initialize prompt',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 모든 기본 프롬프트 초기화 (기존 유지)
+  static async initializeDefaultPrompts(req: Request, res: Response) {
+    try {
+      const defaultKeys = ['chat_assistant', 'passage_commentary', 'question_explanation'];
       const results = [];
-      for (const promptData of defaultPrompts) {
-        const existingPrompt = await SystemPrompt.findOne({ key: promptData.key });
+      const errors = [];
+
+      for (const key of defaultKeys) {
+        const existingPrompt = await SystemPrompt.findOne({ key });
         if (!existingPrompt) {
-          const prompt = new SystemPrompt(promptData);
-          await prompt.save();
-          results.push(prompt);
+          try {
+            const defaultPrompts: Record<string, any> = {
+              'chat_assistant': {
+                key: 'chat_assistant',
+                name: 'AI 채팅 어시스턴트',
+                description: '학생과의 채팅에서 사용되는 메인 시스템 프롬프트',
+                content: `당신은 {subject} 전문 AI 학습 도우미입니다.
+
+# 학습 자료 정보
+- 교재: {textbook_title} ({subject} - {level})
+- 지문 제목: {passage_title}
+
+# 지문 내용
+{passage_content}
+
+# 지문 해설
+{passage_comment}
+
+# 관련 문제
+{questions}
+
+# 역할과 지침
+1. 학생의 질문에 교육적이고 이해하기 쉽게 답변해주세요
+2. 지문의 내용과 관련된 질문에 중점을 두어 답변하세요
+3. 문제 풀이를 요청하면 단계적으로 설명해주세요
+4. 어려운 개념은 구체적인 예시를 들어 설명해주세요
+5. 학생의 수준({level})에 맞는 언어로 설명해주세요
+6. 답변은 500자 이내로 간결하게 작성해주세요
+7. 친근하고 격려하는 톤으로 대화해주세요
+
+학생이 질문하면 위 자료를 바탕으로 정확하고 도움이 되는 답변을 제공해주세요.`
+              },
+              'passage_commentary': {
+                key: 'passage_commentary',
+                name: '지문 해설 생성',
+                description: '지문 내용을 바탕으로 자동으로 해설을 생성하는 프롬프트',
+                content: `주어진 지문을 분석하여 학습자를 위한 상세한 해설을 작성해주세요.
+
+# 지문 정보
+- 제목: {passage_title}
+- 과목: {subject}
+- 수준: {level}
+
+# 지문 내용
+{passage_content}
+
+# 해설 작성 지침
+1. 전체 주제와 핵심 메시지를 명확히 제시
+2. 문단별로 주요 내용과 논리적 흐름 설명
+3. 중요한 개념이나 용어에 대한 설명 포함
+4. 학습자가 이해하기 쉬운 언어로 작성
+5. 문학 작품의 경우 배경, 갈등, 주제의식 등 분석
+6. 비문학의 경우 논증 구조, 핵심 개념 등 분석
+
+해설은 학습자의 수준({level})에 맞게 작성하되, 깊이 있는 이해를 도울 수 있도록 구체적이고 명확하게 작성해주세요.`
+              },
+              'question_explanation': {
+                key: 'question_explanation',
+                name: '문제 해설 생성',
+                description: '문제와 선택지를 바탕으로 자동으로 해설을 생성하는 프롬프트',
+                content: `주어진 문제에 대한 상세한 해설을 작성해주세요.
+
+# 문제 정보
+- 지문: {passage_content}
+- 문제: {question_text}
+- 선택지: {options}
+- 정답: {correct_answer}
+
+# 해설 작성 지침
+1. 정답을 명확히 제시하고 그 이유를 설명
+2. 각 선택지가 왜 정답이거나 오답인지 분석
+3. 지문의 어느 부분을 근거로 하는지 구체적으로 제시
+4. 문제 해결을 위한 사고 과정을 단계별로 설명
+5. 유사한 문제를 풀 때 적용할 수 있는 방법론 제시
+6. 학습자가 실수하기 쉬운 부분에 대한 주의사항
+
+해설은 논리적이고 체계적으로 작성하여 학습자의 이해를 돕고, 유사한 문제에 응용할 수 있는 능력을 기를 수 있도록 해주세요.`
+              }
+            };
+
+            const promptData = defaultPrompts[key];
+            if (promptData) {
+              const prompt = new SystemPrompt(promptData);
+              await prompt.save();
+              results.push(prompt);
+            }
+          } catch (error) {
+            errors.push(`Failed to initialize ${key}: ${error}`);
+          }
         }
       }
 
       res.json({
         success: true,
         data: results,
-        message: `${results.length} default prompts initialized`
+        message: `${results.length} default prompts initialized`,
+        errors: errors.length > 0 ? errors : undefined
       });
     } catch (error) {
       console.error('Initialize default prompts error:', error);
