@@ -226,10 +226,10 @@ export default function QuestionsPage() {
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <div className="text-sm font-medium text-blue-900 mb-1">해설:</div>
                       <div className="prose max-w-none
-                        [&>h1]:text-lg [&>h1]:font-bold [&>h1]:text-blue-900 [&>h1]:mb-2 [&>h1]:mt-3
-                        [&>h2]:text-base [&>h2]:font-bold [&>h2]:text-blue-900 [&>h2]:mb-2 [&>h2]:mt-3  
-                        [&>h3]:text-sm [&>h3]:font-semibold [&>h3]:text-blue-900 [&>h3]:mb-1 [&>h3]:mt-2
-                        [&>h4]:text-sm [&>h4]:font-semibold [&>h4]:text-blue-900 [&>h4]:mb-1 [&>h4]:mt-2
+                        [&>h1]:!text-lg [&>h1]:!font-bold [&>h1]:!text-blue-900 [&>h1]:mb-2 [&>h1]:mt-3
+                        [&>h2]:!text-base [&>h2]:!font-bold [&>h2]:!text-blue-900 [&>h2]:mb-2 [&>h2]:mt-3  
+                        [&>h3]:!text-sm [&>h3]:!font-semibold [&>h3]:!text-blue-900 [&>h3]:mb-1 [&>h3]:mt-2
+                        [&>h4]:!text-sm [&>h4]:!font-semibold [&>h4]:!text-blue-900 [&>h4]:mb-1 [&>h4]:mt-2
                         [&>p]:text-sm [&>p]:text-blue-800 [&>p]:mb-2 [&>p]:leading-relaxed
                         [&>strong]:font-bold [&>strong]:text-blue-900
                         [&>em]:italic [&>em]:text-blue-700
