@@ -3,6 +3,7 @@ import { SystemPrompt } from '../models';
 import { AIService } from '../services/AIService';
 
 export class CommentaryGeneratorController {
+  // 지문 해설 생성
   static async generateCommentary(req: Request, res: Response) {
     try {
       const { title, passage, existingCommentary, subject = '국어', level = '고등학교' } = req.body;
@@ -81,6 +82,98 @@ ${existingCommentary}
       res.status(500).json({
         success: false,
         message: '해설 생성에 실패했습니다.',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // 문제 해설 생성
+  static async generateQuestionExplanation(req: Request, res: Response) {
+    try {
+      const { 
+        passageContent, 
+        questionText, 
+        options, 
+        correctAnswer, 
+        existingExplanation,
+        subject = '국어', 
+        level = '고등학교' 
+      } = req.body;
+
+      if (!passageContent || !questionText || !options || !correctAnswer) {
+        return res.status(400).json({
+          success: false,
+          message: '지문 내용, 문제, 선택지, 정답이 모두 필요합니다.'
+        });
+      }
+
+      // 문제 해설 생성용 시스템 프롬프트 가져오기
+      const promptDoc = await SystemPrompt.findOne({ 
+        key: 'question_explanation', 
+        isActive: true 
+      });
+
+      let systemPrompt = promptDoc?.content;
+      
+      // 프롬프트가 없으면 기본 프롬프트 사용
+      if (!systemPrompt) {
+        systemPrompt = `주어진 문제에 대한 상세한 해설을 작성해주세요.
+
+# 문제 정보
+- 지문: {passage_content}
+- 문제: {question_text}
+- 선택지: {options}
+- 정답: {correct_answer}
+
+# 해설 작성 지침
+1. 정답을 명확히 제시하고 그 이유를 설명
+2. 각 선택지가 왜 정답이거나 오답인지 분석
+3. 지문의 어느 부분을 근거로 하는지 구체적으로 제시
+4. 문제 해결을 위한 사고 과정을 단계별로 설명
+5. 유사한 문제를 풀 때 적용할 수 있는 방법론 제시
+6. 학습자가 실수하기 쉬운 부분에 대한 주의사항
+
+해설은 논리적이고 체계적으로 작성하여 학습자의 이해를 돕고, 유사한 문제에 응용할 수 있는 능력을 기를 수 있도록 해주세요.`;
+      }
+
+      // 변수 치환
+      const optionsText = Array.isArray(options) ? options.join(', ') : options;
+      
+      let finalPrompt = systemPrompt
+        .replace(/{passage_content}/g, passageContent)
+        .replace(/{question_text}/g, questionText)
+        .replace(/{options}/g, optionsText)
+        .replace(/{correct_answer}/g, correctAnswer);
+
+      // 기존 해설이 있다면 참고하도록 프롬프트에 추가
+      if (existingExplanation && existingExplanation.trim()) {
+        finalPrompt += `
+
+# 기존 해설 (참고용)
+다음은 기존에 작성된 해설입니다. 이를 참고하여 더 나은 해설을 작성해주세요:
+
+${existingExplanation}
+
+위 기존 해설을 참고하되, 부족한 부분을 보완하고 더 체계적이고 이해하기 쉽게 개선해주세요.`;
+      }
+
+      // AI를 통해 해설 생성
+      const explanation = await AIService.generateCommentaryWithPrompt(finalPrompt);
+
+      res.json({
+        success: true,
+        data: {
+          explanation,
+          prompt: finalPrompt // 디버깅용
+        },
+        message: '문제 해설이 성공적으로 생성되었습니다.'
+      });
+
+    } catch (error) {
+      console.error('Generate question explanation error:', error);
+      res.status(500).json({
+        success: false,
+        message: '문제 해설 생성에 실패했습니다.',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
