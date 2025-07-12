@@ -6,6 +6,7 @@ import { useTextbookMappings } from '@/hooks/useTextbookMappings';
 import { usePassageSets } from '@/hooks/usePassageSets';
 import { Textbook, PassageSet } from '@/types/common';
 import { apiEndpoints } from '@/lib/api';
+import JSZip from 'jszip';
 
 export default function TextbookDetailPage() {
   const params = useParams();
@@ -108,6 +109,82 @@ export default function TextbookDetailPage() {
     }
   };
 
+  const handleBulkDownloadQR = async () => {
+    if (mappedSets.length === 0) {
+      alert('다운로드할 QR 코드가 없습니다.');
+      return;
+    }
+
+    try {
+      const zip = new JSZip();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const textbookTitle = textbook?.title || '교재';
+      const safeTextbookName = textbookTitle.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
+
+      // 매핑 QR 코드들 다운로드
+      const mappingFolder = zip.folder('교재용_QR');
+      const independentFolder = zip.folder('독립용_QR');
+
+      for (const set of mappedSets) {
+        // 교재용 QR 코드 (매핑 QR)
+        if (set.mappingQrCode && set.mappingId) {
+          try {
+            const mappingUrl = `${apiUrl}/admin/textbooks/${textbookId}/mappings/${set.mappingId}/qr-image`;
+            const mappingResponse = await fetch(mappingUrl, {
+              method: 'GET',
+              credentials: 'include',
+            });
+            
+            if (mappingResponse.ok) {
+              const mappingBlob = await mappingResponse.blob();
+              const safePassageName = set.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
+              mappingFolder?.file(`${safePassageName}_교재용_${set.mappingQrCode}.png`, mappingBlob);
+            }
+          } catch (error) {
+            console.error(`매핑 QR 다운로드 실패 (${set.title}):`, error);
+          }
+        }
+
+        // 독립용 QR 코드
+        try {
+          const independentUrl = `${apiUrl}/admin/passage-sets/${set._id}/qr-image`;
+          const independentResponse = await fetch(independentUrl, {
+            method: 'GET',
+            credentials: 'include',
+          });
+          
+          if (independentResponse.ok) {
+            const independentBlob = await independentResponse.blob();
+            const safePassageName = set.title.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
+            independentFolder?.file(`${safePassageName}_독립용_${set.qrCode}.png`, independentBlob);
+          }
+        } catch (error) {
+          console.error(`독립 QR 다운로드 실패 (${set.title}):`, error);
+        }
+      }
+
+      // ZIP 파일 생성 및 다운로드
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipUrl = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = zipUrl;
+      link.download = `${safeTextbookName}_QR코드_모음.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(zipUrl);
+
+    } catch (error) {
+      console.error('일괄 다운로드 오류:', error);
+      alert('QR 코드 일괄 다운로드에 실패했습니다.');
+    }
+  };
+
+  const handleOpenChat = (qrCode: string, type: 'textbook' | 'independent') => {
+    const chatUrl = `${window.location.origin}/chat/${qrCode}`;
+    window.open(chatUrl, '_blank');
+  };
+
   const handleMoveUp = async (set: PassageSet, index: number) => {
     if (index === 0) return;
     
@@ -164,13 +241,22 @@ export default function TextbookDetailPage() {
             <p className="text-gray-700 mt-2">{textbook.description}</p>
           )}
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          disabled={availableSets.length === 0}
-        >
-          지문세트 추가
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleBulkDownloadQR}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            disabled={mappedSets.length === 0}
+          >
+            QR 일괄 다운로드
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            disabled={availableSets.length === 0}
+          >
+            지문세트 추가
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">
@@ -200,12 +286,30 @@ export default function TextbookDetailPage() {
                       </p>
                       <div className="flex items-center space-x-4 mt-2">
                         <div className="flex flex-col space-y-1">
-                          <span className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            교재용 QR: {set.mappingQrCode || '생성중...'}
-                          </span>
-                          <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
-                            독립용 QR: {set.qrCode}
-                          </span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              교재용 QR: {set.mappingQrCode || '생성중...'}
+                            </span>
+                            {set.mappingQrCode && (
+                              <button
+                                onClick={() => handleOpenChat(set.mappingQrCode!, 'textbook')}
+                                className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                              >
+                                채팅 열기
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                              독립용 QR: {set.qrCode}
+                            </span>
+                            <button
+                              onClick={() => handleOpenChat(set.qrCode, 'independent')}
+                              className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+                            >
+                              채팅 열기
+                            </button>
+                          </div>
                           <span className="text-xs text-purple-600">
                             매핑 ID: {set.mappingId}
                           </span>
