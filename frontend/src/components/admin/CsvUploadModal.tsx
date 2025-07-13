@@ -154,7 +154,11 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
 "다음 글의 중심 내용은?","첫 번째 선택지","두 번째 선택지","세 번째 선택지","네 번째 선택지","다섯 번째 선택지","이 문제는 글의 중심 내용을 파악하는 문제입니다..."
 "빈 칸에 들어갈 말로 가장 적절한 것은?","선택지 1","선택지 2","선택지 3","선택지 4","","AI가 자동으로 해설을 생성합니다"`;
     
-    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    // UTF-8 BOM 추가로 Excel에서 한글 깨짐 방지
+    const BOM = '\uFEFF';
+    const csvContent = BOM + template;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
