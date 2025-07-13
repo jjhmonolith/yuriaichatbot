@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import { Question, PassageSet } from '../models';
+import { Question, PassageSet, SystemPrompt } from '../models';
+import { AIService } from '../services/AIService';
 
 // 임시 메모리 저장소
 let memoryQuestions: any[] = [];
@@ -383,6 +384,208 @@ export class QuestionController {
         message: 'Failed to reorder questions',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  }
+
+  // CSV 파일 일괄 업로드
+  static async bulkUploadQuestions(req: Request, res: Response) {
+    try {
+      const { setId } = req.params;
+      const { questions: csvQuestions } = req.body;
+
+      if (!Array.isArray(csvQuestions) || csvQuestions.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '업로드할 문제가 없습니다.'
+        });
+      }
+
+      let passageSet;
+
+      try {
+        // 지문세트 존재 확인
+        passageSet = await PassageSet.findById(setId);
+        if (!passageSet) {
+          return res.status(404).json({
+            success: false,
+            message: '지문세트를 찾을 수 없습니다.'
+          });
+        }
+
+        // 현재 문제 개수 확인하여 문제 번호 시작점 결정
+        const lastQuestion = await Question.findOne({ setId })
+          .sort({ questionNumber: -1 });
+        let startQuestionNumber = lastQuestion ? lastQuestion.questionNumber + 1 : 1;
+
+        // 문제 해설 생성용 시스템 프롬프트 가져오기
+        const promptDoc = await SystemPrompt.findOne({ 
+          key: 'question_explanation', 
+          isActive: true 
+        });
+
+        const createdQuestions = [];
+        const aiGenerationErrors = [];
+
+        for (let i = 0; i < csvQuestions.length; i++) {
+          const csvQuestion = csvQuestions[i];
+          
+          // 선택지 배열 생성 (빈 값 제거)
+          const options = [
+            csvQuestion.option1,
+            csvQuestion.option2,
+            csvQuestion.option3,
+            csvQuestion.option4,
+            csvQuestion.option5
+          ].filter(opt => opt && opt.trim()).map(opt => opt.trim());
+
+          if (options.length < 2) {
+            return res.status(400).json({
+              success: false,
+              message: `문제 ${i + 1}: 최소 2개의 선택지가 필요합니다.`
+            });
+          }
+
+          // 정답은 첫 번째 선택지로 기본 설정 (CSV에서 정답 지정 기능 추가 가능)
+          const correctAnswer = options[0];
+          let explanation = csvQuestion.explanation?.trim() || '';
+
+          // 해설이 비어있으면 AI로 생성
+          if (!explanation) {
+            try {
+              explanation = await QuestionController.generateAIExplanation(
+                passageSet,
+                csvQuestion.questionText,
+                options,
+                correctAnswer,
+                promptDoc?.content
+              );
+            } catch (aiError) {
+              console.error(`AI 해설 생성 실패 (문제 ${i + 1}):`, aiError);
+              aiGenerationErrors.push(`문제 ${i + 1}: AI 해설 생성 실패`);
+              explanation = '해설을 생성할 수 없습니다. 수동으로 입력해주세요.';
+            }
+          }
+
+          const questionData = {
+            setId,
+            questionNumber: startQuestionNumber + i,
+            questionText: csvQuestion.questionText.trim(),
+            options,
+            correctAnswer,
+            explanation
+          };
+
+          const question = new Question(questionData);
+          await question.save();
+          
+          const populatedQuestion = await Question.findById(question._id)
+            .populate('setId', 'title');
+          
+          createdQuestions.push(populatedQuestion);
+        }
+
+        let message = `${createdQuestions.length}개의 문제가 성공적으로 생성되었습니다.`;
+        if (aiGenerationErrors.length > 0) {
+          message += ` (AI 해설 생성 실패: ${aiGenerationErrors.length}건)`;
+        }
+
+        res.status(201).json({
+          success: true,
+          data: createdQuestions,
+          message,
+          aiGenerationErrors: aiGenerationErrors.length > 0 ? aiGenerationErrors : undefined
+        });
+
+      } catch (dbError) {
+        console.error('MongoDB error during bulk upload:', dbError);
+        return res.status(500).json({
+          success: false,
+          message: '데이터베이스 오류가 발생했습니다.',
+          error: dbError instanceof Error ? dbError.message : 'Unknown database error'
+        });
+      }
+
+    } catch (error) {
+      console.error('Bulk upload error:', error);
+      res.status(500).json({
+        success: false,
+        message: '일괄 업로드에 실패했습니다.',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // AI 해설 생성 헬퍼 메서드
+  private static async generateAIExplanation(
+    passageSet: any,
+    questionText: string,
+    options: string[],
+    correctAnswer: string,
+    systemPrompt?: string
+  ): Promise<string> {
+    
+    let prompt = systemPrompt;
+    
+    // 기본 프롬프트 사용
+    if (!prompt) {
+      prompt = `주어진 지문과 문제를 바탕으로 상세한 해설을 **마크다운 형식**으로 작성해주세요.
+
+# 지문 정보
+**제목**: {passage_title}
+
+# 지문 내용
+{passage_content}
+
+# 문제 정보
+**문제**: {question_text}
+
+**선택지**:
+{options_list}
+
+**정답**: {correct_answer}
+
+# 해설 작성 지침
+다음과 같은 마크다운 구조로 해설을 작성해주세요:
+
+## 🎯 정답 및 핵심 포인트
+- **정답**: {correct_answer}
+- **핵심**: 이 문제의 핵심 개념이나 해결 포인트
+
+## 📝 단계별 해설
+### 1단계: 문제 분석
+- 문제에서 요구하는 것이 무엇인지 파악
+
+### 2단계: 지문 분석  
+- 지문에서 핵심 정보 찾기
+
+### 3단계: 선택지 검토
+- 각 선택지별 분석 및 정답 도출 과정
+
+## ❌ 오답 분석
+각 오답 선택지가 틀린 이유를 간단히 설명
+
+답변은 고등학생이 이해하기 쉽도록 친근한 어조로 작성해주세요.`;
+    }
+
+    // 선택지 목록 생성
+    const optionsList = options.map((option, index) => 
+      `${index + 1}. ${option}`
+    ).join('\n');
+
+    // 프롬프트 치환
+    const finalPrompt = prompt
+      .replace('{passage_title}', passageSet.title || '지문')
+      .replace('{passage_content}', passageSet.passage || '')
+      .replace('{question_text}', questionText)
+      .replace('{options_list}', optionsList)
+      .replace('{correct_answer}', correctAnswer);
+
+    try {
+      const response = await AIService.generateResponse(finalPrompt);
+      return response;
+    } catch (error) {
+      console.error('AI service error:', error);
+      throw new Error('AI 해설 생성에 실패했습니다.');
     }
   }
 }

@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
-import { Plus, Edit, Trash2, HelpCircle, Search, ArrowLeft, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, HelpCircle, Search, ArrowLeft, BookOpen, Upload } from 'lucide-react';
 import { Question } from '@/types/common';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import QuestionForm from '@/components/admin/QuestionForm';
+import CsvUploadModal from '@/components/admin/CsvUploadModal';
 
 interface PassageSet {
   _id: string;
@@ -32,6 +33,7 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [isCsvUploadOpen, setIsCsvUploadOpen] = useState(false);
 
   useEffect(() => {
     fetchPassageSetAndQuestions();
@@ -154,6 +156,29 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
     setIsEditModalOpen(true);
   };
 
+  const handleCsvUpload = async (csvQuestions: any[]) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
+      const response = await fetch(`${apiUrl}/admin/sets/${params.setId}/questions/bulk-upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: csvQuestions })
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        alert(`${csvQuestions.length}개의 문제가 성공적으로 업로드되었습니다.`);
+        fetchPassageSetAndQuestions();
+        setIsCsvUploadOpen(false);
+      } else {
+        throw new Error(result.message || '업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('CSV upload error:', error);
+      throw error; // 모달에서 에러 처리
+    }
+  };
+
   if (loading) {
     return (
       <div className="px-6 mx-auto max-w-7xl">
@@ -205,13 +230,23 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
               &quot;{passageSet.title}&quot; 지문세트의 문제를 관리합니다.
             </p>
           </div>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center space-x-2"
-          >
-            <Plus className="h-4 w-4" />
-            <span>새 문제 추가</span>
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsCsvUploadOpen(true)}
+              className="flex items-center space-x-2"
+            >
+              <Upload className="h-4 w-4" />
+              <span>일괄 업로드</span>
+            </Button>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>새 문제 추가</span>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -384,6 +419,14 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
           />
         )}
       </Modal>
+
+      {/* CSV Upload Modal */}
+      <CsvUploadModal
+        isOpen={isCsvUploadOpen}
+        onClose={() => setIsCsvUploadOpen(false)}
+        onUpload={handleCsvUpload}
+        setId={params.setId}
+      />
     </div>
   );
 }
