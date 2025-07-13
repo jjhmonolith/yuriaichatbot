@@ -20,6 +20,7 @@ interface CsvQuestion {
   option3: string;
   option4: string;
   option5?: string;
+  correctAnswer: string;
   explanation: string;
 }
 
@@ -65,6 +66,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
           const option3 = row['선지3'] || row['3번'] || row['option3'] || '';
           const option4 = row['선지4'] || row['4번'] || row['option4'] || '';
           const option5 = row['선지5'] || row['5번'] || row['option5'] || '';
+          const correctAnswerNum = row['정답'] || row['답'] || row['correctAnswer'] || '';
           const explanation = row['해설'] || row['설명'] || row['explanation'] || '';
 
           // 필수 항목 검증
@@ -88,6 +90,15 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
             return;
           }
 
+          // 정답 번호 검증
+          const answerNum = parseInt(correctAnswerNum.toString().trim());
+          if (!answerNum || answerNum < 1 || answerNum > options.length) {
+            parseErrors.push(`${index + 2}행: 정답은 1부터 ${options.length}까지의 숫자여야 합니다.`);
+            return;
+          }
+
+          const correctAnswer = options[answerNum - 1]; // 1-based에서 0-based로 변환
+
           // 해설이 비어있는지 확인
           const needsAiExplanation = !explanation.trim();
 
@@ -99,6 +110,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
             option3: option3.trim(),
             option4: option4.trim(),
             option5: option5.trim(),
+            correctAnswer: correctAnswer,
             explanation: explanation.trim(),
             needsAiExplanation,
             options
@@ -150,9 +162,10 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   };
 
   const downloadTemplate = () => {
-    const template = `문제,선지1,선지2,선지3,선지4,선지5,해설
-"다음 글의 중심 내용은?","첫 번째 선택지","두 번째 선택지","세 번째 선택지","네 번째 선택지","다섯 번째 선택지","이 문제는 글의 중심 내용을 파악하는 문제입니다..."
-"빈 칸에 들어갈 말로 가장 적절한 것은?","선택지 1","선택지 2","선택지 3","선택지 4","","AI가 자동으로 해설을 생성합니다"`;
+    const template = `문제,선지1,선지2,선지3,선지4,선지5,정답,해설
+"다음 글의 중심 내용은?","첫 번째 선택지","두 번째 선택지","세 번째 선택지","네 번째 선택지","다섯 번째 선택지","1","이 문제는 글의 중심 내용을 파악하는 문제입니다..."
+"빈 칸에 들어갈 말로 가장 적절한 것은?","선택지 1","선택지 2","선택지 3","선택지 4","","3",""`;
+    
     
     // UTF-8 BOM 추가로 Excel에서 한글 깨짐 방지
     const BOM = '\uFEFF';
@@ -188,7 +201,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 <div className="flex-1">
                   <h4 className="text-sm font-medium text-blue-900">CSV 파일 형식</h4>
                   <p className="text-sm text-blue-700 mt-1">
-                    발문, 선지1~5, 해설 순서로 작성해주세요. 해설이 비어있으면 AI가 자동 생성합니다.
+                    발문, 선지1~5, 정답(1~5 숫자), 해설 순서로 작성해주세요. 해설이 비어있으면 AI가 자동 생성합니다.
                   </p>
                   <button
                     onClick={downloadTemplate}

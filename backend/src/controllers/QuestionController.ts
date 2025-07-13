@@ -303,9 +303,38 @@ export class QuestionController {
     try {
       const { id } = req.params;
       let question;
+      let setId;
 
       try {
-        question = await Question.findByIdAndDelete(id);
+        // 삭제할 문제 정보 먼저 가져오기
+        question = await Question.findById(id);
+        if (!question) {
+          return res.status(404).json({
+            success: false,
+            message: 'Question not found'
+          });
+        }
+
+        setId = question.setId;
+
+        // 문제 삭제
+        await Question.findByIdAndDelete(id);
+
+        // 같은 setId의 모든 문제들 가져와서 번호 재정렬
+        const remainingQuestions = await Question.find({ setId })
+          .sort({ questionNumber: 1 });
+
+        // 번호 재정렬 (1부터 순차적으로)
+        const updatePromises = remainingQuestions.map((q, index) => 
+          Question.findByIdAndUpdate(
+            q._id,
+            { questionNumber: index + 1 },
+            { new: true }
+          )
+        );
+
+        await Promise.all(updatePromises);
+
       } catch (dbError) {
         // MongoDB 실패 시 메모리 데이터에서 삭제
         console.log('Using memory storage for delete question (MongoDB not available)');
@@ -319,19 +348,24 @@ export class QuestionController {
         }
 
         question = memoryQuestions[index];
+        setId = question.setId;
         memoryQuestions.splice(index, 1);
-      }
 
-      if (!question) {
-        return res.status(404).json({
-          success: false,
-          message: 'Question not found'
+        // 메모리에서도 번호 재정렬
+        const sameSetQuestions = memoryQuestions.filter(q => {
+          const questionSetId = q.setId?._id || q.setId;
+          return questionSetId.toString() === setId.toString();
+        });
+        
+        sameSetQuestions.sort((a, b) => a.questionNumber - b.questionNumber);
+        sameSetQuestions.forEach((q, index) => {
+          q.questionNumber = index + 1;
         });
       }
 
       res.json({
         success: true,
-        message: 'Question deleted successfully'
+        message: 'Question deleted and numbers reordered successfully'
       });
     } catch (error) {
       console.error('Delete question error:', error);
@@ -445,8 +479,8 @@ export class QuestionController {
             });
           }
 
-          // 정답은 첫 번째 선택지로 기본 설정 (CSV에서 정답 지정 기능 추가 가능)
-          const correctAnswer = options[0];
+          // CSV에서 전달받은 정답 사용
+          const correctAnswer = csvQuestion.correctAnswer;
           let explanation = csvQuestion.explanation?.trim() || '';
 
           // 해설이 비어있으면 AI로 생성
