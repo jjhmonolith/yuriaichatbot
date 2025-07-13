@@ -35,14 +35,14 @@ router.get('/debug/env', (req, res) => {
         envKeys: Object.keys(process.env).filter(key => key.includes('OPENAI') || key.includes('API'))
     });
 });
-// Admin routes - specific routes first
+// Admin routes - specific routes first, more specific paths before general ones
 router.use('/admin/textbooks/:textbookId/sets', textbook_sets_1.default); // LEGACY
 router.use('/admin/textbooks/:textbookId/mappings', textbook_mappings_1.default); // NEW
+router.use('/admin/sets/:setId/questions', set_questions_1.default); // Must come before /admin/sets
 router.use('/admin/textbooks', textbooks_1.default);
 router.use('/admin/sets', sets_1.default); // LEGACY
 router.use('/admin/passage-sets', passage_sets_1.default); // NEW
-router.use('/admin/questions', questions_1.default); // 더 구체적인 경로를 먼저
-router.use('/admin/sets/:setId/questions', set_questions_1.default);
+router.use('/admin/questions', questions_1.default);
 router.use('/admin/system-prompts', system_prompts_1.default);
 router.use('/admin/commentary-generator', commentary_generator_1.default);
 router.use('/admin/dashboard', dashboard_1.default);

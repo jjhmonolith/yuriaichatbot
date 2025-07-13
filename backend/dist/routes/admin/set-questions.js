@@ -6,5 +6,6 @@ const router = (0, express_1.Router)({ mergeParams: true });
 // 특정 지문세트의 문제 라우트
 router.get('/', QuestionController_1.QuestionController.getQuestions);
 router.post('/', QuestionController_1.QuestionController.createQuestion);
+router.post('/bulk-upload', QuestionController_1.QuestionController.bulkUploadQuestions);
 router.put('/reorder', QuestionController_1.QuestionController.reorderQuestions);
 exports.default = router;

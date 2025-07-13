@@ -581,7 +581,7 @@ export class QuestionController {
       .replace('{correct_answer}', correctAnswer);
 
     try {
-      const response = await AIService.generateResponse(finalPrompt);
+      const response = await AIService.generateResponse(finalPrompt, passageSet);
       return response;
     } catch (error) {
       console.error('AI service error:', error);
