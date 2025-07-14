@@ -462,6 +462,7 @@ export class QuestionController {
 
         for (let i = 0; i < csvQuestions.length; i++) {
           const csvQuestion = csvQuestions[i];
+          console.log(`Processing question ${i + 1}:`, csvQuestion); // 디버깅 로그
           
           // 선택지 배열 생성 (빈 값 제거)
           const options = [
@@ -481,7 +482,9 @@ export class QuestionController {
 
           // CSV에서 전달받은 정답 사용
           const correctAnswer = csvQuestion.correctAnswer;
+          console.log(`Question ${i + 1} - Options:`, options, 'Correct Answer:', correctAnswer); // 디버깅 로그
           let explanation = csvQuestion.explanation?.trim() || '';
+          console.log(`Question ${i + 1} - Explanation empty:`, !explanation); // 디버깅 로그
 
           // 해설이 비어있으면 AI로 생성
           if (!explanation) {
@@ -508,6 +511,8 @@ export class QuestionController {
             correctAnswer,
             explanation
           };
+
+          console.log(`Creating question ${i + 1} with data:`, questionData); // 디버깅 로그
 
           const question = new Question(questionData);
           await question.save();

@@ -46,6 +46,11 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
+      // 이전 상태 초기화
+      setErrors([]);
+      setParsedQuestions([]);
+      setStep('upload');
+      
       setFile(selectedFile);
       parseCSV(selectedFile);
     }

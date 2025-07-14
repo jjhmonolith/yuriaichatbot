@@ -158,6 +158,8 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
 
   const handleCsvUpload = async (csvQuestions: any[]) => {
     try {
+      console.log('Uploading CSV questions:', csvQuestions); // 디버깅 로그
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://yuriaichatbot-production-1f9d.up.railway.app/api';
       const response = await fetch(`${apiUrl}/admin/sets/${params.setId}/questions/bulk-upload`, {
         method: 'POST',
@@ -166,8 +168,14 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
       });
       
       const result = await response.json();
+      console.log('Upload result:', result); // 디버깅 로그
+      
       if (result.success) {
-        alert(`${csvQuestions.length}개의 문제가 성공적으로 업로드되었습니다.`);
+        const message = result.aiGenerationErrors && result.aiGenerationErrors.length > 0
+          ? `${csvQuestions.length}개의 문제가 업로드되었습니다. (AI 해설 생성 실패: ${result.aiGenerationErrors.length}건)`
+          : `${csvQuestions.length}개의 문제가 성공적으로 업로드되었습니다.`;
+        
+        alert(message);
         fetchPassageSetAndQuestions();
         setIsCsvUploadOpen(false);
       } else {
