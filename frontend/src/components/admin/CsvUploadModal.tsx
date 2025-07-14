@@ -161,6 +161,11 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     }
   };
 
+  const handleFileInputClick = () => {
+    // 파일 입력 클릭 시 상태 초기화
+    resetState();
+  };
+
   const handleClose = () => {
     resetState();
     onClose();
@@ -221,7 +226,10 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
             {/* 파일 업로드 */}
             <div
               className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                handleFileInputClick();
+                fileInputRef.current?.click();
+              }}
             >
               <Upload className="mx-auto h-12 w-12 text-gray-400" />
               <div className="mt-4">
@@ -229,7 +237,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                   {file ? file.name : 'CSV 파일을 선택하세요'}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                  클릭하거나 파일을 드래그하여 업로드
+                  클릭하여 파일 선택 (재선택 시 이전 내용이 초기화됩니다)
                 </p>
               </div>
               <input
@@ -237,6 +245,7 @@ const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 type="file"
                 accept=".csv"
                 onChange={handleFileSelect}
+                onClick={handleFileInputClick}
                 className="hidden"
               />
             </div>

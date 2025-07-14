@@ -303,7 +303,7 @@ export class QuestionController {
     try {
       const { id } = req.params;
       let question;
-      let setId;
+      let setId: any;
 
       try {
         // 삭제할 문제 정보 먼저 가져오기
@@ -488,6 +488,7 @@ export class QuestionController {
 
           // 해설이 비어있으면 AI로 생성
           if (!explanation) {
+            console.log(`AI 해설 생성 시작 - 문제 ${i + 1}`);
             try {
               explanation = await QuestionController.generateAIExplanation(
                 passageSet,
@@ -496,11 +497,14 @@ export class QuestionController {
                 correctAnswer,
                 promptDoc?.content
               );
+              console.log(`AI 해설 생성 성공 - 문제 ${i + 1}, 길이: ${explanation.length}`);
             } catch (aiError) {
               console.error(`AI 해설 생성 실패 (문제 ${i + 1}):`, aiError);
-              aiGenerationErrors.push(`문제 ${i + 1}: AI 해설 생성 실패`);
+              aiGenerationErrors.push(`문제 ${i + 1}: AI 해설 생성 실패 - ${(aiError as Error).message}`);
               explanation = '해설을 생성할 수 없습니다. 수동으로 입력해주세요.';
             }
+          } else {
+            console.log(`기존 해설 사용 - 문제 ${i + 1}`);
           }
 
           const questionData = {
@@ -620,7 +624,7 @@ export class QuestionController {
       .replace('{correct_answer}', correctAnswer);
 
     try {
-      const response = await AIService.generateResponse(finalPrompt, passageSet);
+      const response = await AIService.generateCommentaryWithPrompt(finalPrompt);
       return response;
     } catch (error) {
       console.error('AI service error:', error);
