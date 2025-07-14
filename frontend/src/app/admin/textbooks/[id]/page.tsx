@@ -325,7 +325,7 @@ export default function TextbookDetailPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => router.push(`/admin/questions?setId=${set._id}`)}
+                    onClick={() => router.push(`/admin/passage-sets/${set._id}/questions`)}
                     className="text-blue-600 hover:text-blue-800 text-sm"
                   >
                     문제 관리
