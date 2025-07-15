@@ -129,6 +129,7 @@ export default function QuestionForm({
         },
         body: JSON.stringify({
           passageContent: passageSet.passage,
+          passageComment: passageSet.passageComment,
           questionText: formData.questionText,
           options: validOptions,
           correctAnswer: formData.correctAnswer,

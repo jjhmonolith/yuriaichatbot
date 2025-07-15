@@ -157,11 +157,40 @@ export class QuestionController {
           .sort({ questionNumber: -1 });
         questionNumber = lastQuestion ? lastQuestion.questionNumber + 1 : 1;
 
-        const questionData = {
+        let questionData = {
           ...req.body,
           setId,
           questionNumber
         };
+
+        // 해설이 비어있으면 AI 해설 생성
+        if (!questionData.explanation || questionData.explanation.trim() === '') {
+          try {
+            console.log('개별 생성 시 AI 해설 생성 시작');
+            const explanation = await AIService.generateQuestionExplanation({
+              passageContent: passageSet.passage || '',
+              passageComment: passageSet.passageComment || '',
+              questionText: questionData.questionText,
+              options: questionData.options,
+              correctAnswer: questionData.correctAnswer,
+              subject: '국어',
+              level: '고등학교'
+            });
+            questionData.explanation = explanation;
+            questionData.explanationStatus = 'completed';
+            questionData.explanationGeneratedAt = new Date();
+            console.log('개별 생성 시 AI 해설 생성 완료');
+          } catch (aiError) {
+            console.error('개별 생성 시 AI 해설 생성 실패:', aiError);
+            // AI 해설 생성 실패 시 더미 해설 사용
+            questionData.explanation = '🤖 AI 해설을 생성중입니다...\n\n잠시만 기다려주세요. 곧 상세한 해설이 업데이트됩니다.';
+            questionData.explanationStatus = 'failed';
+            questionData.explanationError = aiError instanceof Error ? aiError.message : 'AI 해설 생성 실패';
+          }
+        } else {
+          // 해설이 이미 있으면 완료 상태로 설정
+          questionData.explanationStatus = 'completed';
+        }
 
         question = new Question(questionData);
         await question.save();
