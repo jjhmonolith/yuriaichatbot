@@ -283,6 +283,202 @@ ${questionsText}
 **※ 현재는 데모 모드입니다. OpenAI API 연동 시 더 정확하고 상세한 해설이 제공됩니다.**`;
   }
 
+  // 통일된 문제 해설 생성 메서드
+  static async generateQuestionExplanation(params: {
+    passageContent: string;
+    passageComment?: string;
+    questionText: string;
+    options: string[];
+    correctAnswer: string;
+    existingExplanation?: string;
+    subject?: string;
+    level?: string;
+  }): Promise<string> {
+    const client = this.getClient();
+    
+    // OpenAI API가 설정되지 않은 경우 더미 응답
+    if (!client) {
+      return this.generateDummyQuestionExplanation(params);
+    }
+
+    try {
+      // 시스템 프롬프트 가져오기
+      const promptDoc = await SystemPrompt.findOne({ 
+        key: 'question_explanation', 
+        isActive: true 
+      });
+
+      let systemPrompt = promptDoc?.content;
+      
+      // 프롬프트가 없으면 기본 프롬프트 사용
+      if (!systemPrompt) {
+        systemPrompt = this.getDefaultQuestionExplanationPrompt();
+      }
+
+      // 프롬프트 변수 치환
+      const finalPrompt = this.substitutePromptVariables(systemPrompt, params);
+
+      // OpenAI API 호출
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: finalPrompt }
+        ],
+        max_tokens: 2000, // 해설이므로 더 긴 응답 허용
+        temperature: 0.7,
+        presence_penalty: 0.1,
+        frequency_penalty: 0.1,
+      });
+
+      const explanation = response.choices[0]?.message?.content;
+      if (!explanation) {
+        throw new Error('AI 해설을 받을 수 없습니다.');
+      }
+
+      return explanation;
+    } catch (error) {
+      console.error('OpenAI API error for question explanation:', error);
+      
+      // API 오류 시 더미 응답으로 폴백
+      return this.generateDummyQuestionExplanation(params);
+    }
+  }
+
+  // 프롬프트 변수 치환 메서드
+  private static substitutePromptVariables(
+    systemPrompt: string,
+    params: {
+      passageContent: string;
+      passageComment?: string;
+      questionText: string;
+      options: string[];
+      correctAnswer: string;
+      existingExplanation?: string;
+      subject?: string;
+      level?: string;
+    }
+  ): string {
+    const {
+      passageContent,
+      passageComment = '',
+      questionText,
+      options,
+      correctAnswer,
+      existingExplanation,
+      subject = '국어',
+      level = '고등학교'
+    } = params;
+
+    // 선택지 텍스트 생성 (기존 개별 생성 로직과 동일)
+    const optionsText = Array.isArray(options) ? options.join(', ') : String(options);
+    
+    // 변수 치환
+    let finalPrompt = systemPrompt
+      .replace(/{passage_content}/g, passageContent)
+      .replace(/{passage_comment}/g, passageComment)
+      .replace(/{question_text}/g, questionText)
+      .replace(/{options}/g, optionsText)
+      .replace(/{correct_answer}/g, correctAnswer)
+      .replace(/{subject}/g, subject)
+      .replace(/{level}/g, level);
+
+    // 기존 해설이 있다면 참고하도록 프롬프트에 추가
+    if (existingExplanation && existingExplanation.trim()) {
+      finalPrompt += `
+
+# 기존 해설 (참고용)
+다음은 기존에 작성된 해설입니다. 이를 참고하여 더 나은 해설을 작성해주세요:
+
+${existingExplanation}
+
+위 기존 해설을 참고하되, 부족한 부분을 보완하고 더 체계적이고 이해하기 쉽게 개선해주세요.`;
+    }
+
+    return finalPrompt;
+  }
+
+  // 기본 문제 해설 프롬프트 (fallback용)
+  private static getDefaultQuestionExplanationPrompt(): string {
+    return `주어진 문제에 대한 상세한 해설을 **마크다운 형식**으로 작성해주세요.
+
+# 문제 정보
+- **지문**: {passage_content}
+- **지문 해설**: {passage_comment}
+- **문제**: {question_text}
+- **선택지**: {options}
+- **정답**: {correct_answer}
+
+# 해설 작성 지침
+다음과 같은 마크다운 구조로 해설을 작성해주세요:
+
+## 🎯 정답 및 핵심 이유
+**정답: {correct_answer}**
+
+정답의 핵심 근거를 명확히 제시해주세요.
+
+## 📊 선택지 분석
+각 선택지를 순서대로 분석하고 정답/오답 여부와 이유를 설명해주세요.
+
+## 📖 지문 근거
+> 지문에서 정답을 뒷받침하는 **구체적인 부분**을 인용하고 설명
+
+## 🔍 문제 해결 과정
+1. **1단계**: 문제에서 묻는 것 파악
+2. **2단계**: 지문에서 관련 정보 찾기  
+3. **3단계**: 선택지와 비교 분석
+4. **4단계**: 정답 도출
+
+## 💡 학습 팁
+- **유사 문제 접근법**: 이런 유형의 문제를 풀 때 주의할 점
+- **실수 주의**: 학습자가 자주 틀리는 함정
+- **핵심 포인트**: 반드시 기억해야 할 요점
+
+해설은 논리적이고 체계적으로 작성하여 학습자의 이해를 돕고, 유사한 문제에 응용할 수 있는 능력을 기를 수 있도록 해주세요.`;
+  }
+
+  // 더미 문제 해설 생성 (OpenAI API가 없을 때)
+  private static generateDummyQuestionExplanation(params: {
+    passageContent: string;
+    passageComment?: string;
+    questionText: string;
+    options: string[];
+    correctAnswer: string;
+    existingExplanation?: string;
+    subject?: string;
+    level?: string;
+  }): string {
+    const { questionText, options, correctAnswer } = params;
+    
+    return `## 🎯 정답 및 핵심 이유
+**정답: ${correctAnswer}**
+
+이 문제는 지문의 핵심 내용을 정확히 이해했는지 묻는 문제입니다.
+
+## 📊 선택지 분석
+${options.map((option, index) => {
+  const isCorrect = option === correctAnswer;
+  return `### ${index + 1}. ${option}
+- **판단**: ${isCorrect ? '✅ 정답' : '❌ 오답'}
+- **이유**: ${isCorrect ? '지문의 내용과 일치합니다.' : '지문의 내용과 일치하지 않습니다.'}`;
+}).join('\n\n')}
+
+## 📖 지문 근거
+지문을 꼼꼼히 읽어보면 정답을 뒷받침하는 근거를 찾을 수 있습니다.
+
+## 🔍 문제 해결 과정
+1. **1단계**: 문제에서 묻는 것 파악
+2. **2단계**: 지문에서 관련 정보 찾기
+3. **3단계**: 선택지와 비교 분석
+4. **4단계**: 정답 도출
+
+## 💡 학습 팁
+- 지문을 정확히 이해하는 것이 중요합니다
+- 각 선택지를 지문과 비교하며 검토하세요
+- 문제 유형별 접근법을 익히세요
+
+**※ 현재는 데모 모드입니다. OpenAI API 연동 시 더 정확하고 상세한 해설이 제공됩니다.**`;
+  }
+
   // 사용 통계 (나중에 구현)
   static async getUsageStats(): Promise<any> {
     // TODO: 사용량 통계 구현

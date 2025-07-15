@@ -455,7 +455,16 @@ class QuestionController {
                         if (!explanation) {
                             console.log(`AI 해설 생성 시작 - 문제 ${i + 1}`);
                             try {
-                                explanation = yield QuestionController.generateAIExplanation(passageSet, csvQuestion.questionText, options, correctAnswer, promptDoc === null || promptDoc === void 0 ? void 0 : promptDoc.content);
+                                // 통일된 해설 생성 메서드 사용
+                                explanation = yield AIService_1.AIService.generateQuestionExplanation({
+                                    passageContent: passageSet.passage || '',
+                                    passageComment: passageSet.passageComment || '',
+                                    questionText: csvQuestion.questionText,
+                                    options,
+                                    correctAnswer,
+                                    subject: '국어',
+                                    level: '고등학교'
+                                });
                                 console.log(`AI 해설 생성 성공 - 문제 ${i + 1}, 길이: ${explanation.length}`);
                             }
                             catch (aiError) {
@@ -509,69 +518,6 @@ class QuestionController {
                     message: '일괄 업로드에 실패했습니다.',
                     error: error instanceof Error ? error.message : 'Unknown error'
                 });
-            }
-        });
-    }
-    // AI 해설 생성 헬퍼 메서드
-    static generateAIExplanation(passageSet, questionText, options, correctAnswer, systemPrompt) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let prompt = systemPrompt;
-            // 기본 프롬프트 사용
-            if (!prompt) {
-                prompt = `주어진 지문과 문제를 바탕으로 상세한 해설을 **마크다운 형식**으로 작성해주세요.
-
-# 지문 정보
-**제목**: {passage_title}
-
-# 지문 내용
-{passage_content}
-
-# 문제 정보
-**문제**: {question_text}
-
-**선택지**:
-{options_list}
-
-**정답**: {correct_answer}
-
-# 해설 작성 지침
-다음과 같은 마크다운 구조로 해설을 작성해주세요:
-
-## 🎯 정답 및 핵심 포인트
-- **정답**: {correct_answer}
-- **핵심**: 이 문제의 핵심 개념이나 해결 포인트
-
-## 📝 단계별 해설
-### 1단계: 문제 분석
-- 문제에서 요구하는 것이 무엇인지 파악
-
-### 2단계: 지문 분석  
-- 지문에서 핵심 정보 찾기
-
-### 3단계: 선택지 검토
-- 각 선택지별 분석 및 정답 도출 과정
-
-## ❌ 오답 분석
-각 오답 선택지가 틀린 이유를 간단히 설명
-
-답변은 고등학생이 이해하기 쉽도록 친근한 어조로 작성해주세요.`;
-            }
-            // 선택지 목록 생성
-            const optionsList = options.map((option, index) => `${index + 1}. ${option}`).join('\n');
-            // 프롬프트 치환
-            const finalPrompt = prompt
-                .replace('{passage_title}', passageSet.title || '지문')
-                .replace('{passage_content}', passageSet.passage || '')
-                .replace('{question_text}', questionText)
-                .replace('{options_list}', optionsList)
-                .replace('{correct_answer}', correctAnswer);
-            try {
-                const response = yield AIService_1.AIService.generateCommentaryWithPrompt(finalPrompt);
-                return response;
-            }
-            catch (error) {
-                console.error('AI service error:', error);
-                throw new Error('AI 해설 생성에 실패했습니다.');
             }
         });
     }
