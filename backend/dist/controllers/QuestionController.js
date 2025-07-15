@@ -302,6 +302,7 @@ class QuestionController {
                 const { id } = req.params;
                 let question;
                 let setId;
+                let questionDeleted = false;
                 try {
                     // 삭제할 문제 정보 먼저 가져오기
                     question = yield models_1.Question.findById(id);
@@ -313,13 +314,35 @@ class QuestionController {
                     }
                     setId = question.setId;
                     // 문제 삭제
-                    yield models_1.Question.findByIdAndDelete(id);
+                    const deleteResult = yield models_1.Question.findByIdAndDelete(id);
+                    questionDeleted = !!deleteResult;
+                    if (!questionDeleted) {
+                        return res.status(404).json({
+                            success: false,
+                            message: 'Question not found or already deleted'
+                        });
+                    }
                     // 같은 setId의 모든 문제들 가져와서 번호 재정렬
                     const remainingQuestions = yield models_1.Question.find({ setId })
                         .sort({ questionNumber: 1 });
-                    // 번호 재정렬 (1부터 순차적으로)
-                    const updatePromises = remainingQuestions.map((q, index) => models_1.Question.findByIdAndUpdate(q._id, { questionNumber: index + 1 }, { new: true }));
-                    yield Promise.all(updatePromises);
+                    // 번호 재정렬 (1부터 순차적으로) - 에러가 나도 삭제는 성공으로 처리
+                    try {
+                        const updatePromises = remainingQuestions.map((q, index) => models_1.Question.findByIdAndUpdate(q._id, { questionNumber: index + 1 }, { new: true }));
+                        yield Promise.all(updatePromises);
+                        res.json({
+                            success: true,
+                            message: 'Question deleted and numbers reordered successfully'
+                        });
+                    }
+                    catch (reorderError) {
+                        // 번호 재정렬에 실패해도 삭제는 성공으로 처리
+                        console.error('Question reorder error (deletion successful):', reorderError);
+                        res.json({
+                            success: true,
+                            message: 'Question deleted successfully (reorder partially failed)',
+                            warning: 'Question numbers may need manual adjustment'
+                        });
+                    }
                 }
                 catch (dbError) {
                     // MongoDB 실패 시 메모리 데이터에서 삭제
@@ -334,21 +357,27 @@ class QuestionController {
                     question = memoryQuestions[index];
                     setId = question.setId;
                     memoryQuestions.splice(index, 1);
+                    questionDeleted = true;
                     // 메모리에서도 번호 재정렬
-                    const sameSetQuestions = memoryQuestions.filter(q => {
-                        var _a;
-                        const questionSetId = ((_a = q.setId) === null || _a === void 0 ? void 0 : _a._id) || q.setId;
-                        return questionSetId.toString() === setId.toString();
-                    });
-                    sameSetQuestions.sort((a, b) => a.questionNumber - b.questionNumber);
-                    sameSetQuestions.forEach((q, index) => {
-                        q.questionNumber = index + 1;
+                    try {
+                        const sameSetQuestions = memoryQuestions.filter(q => {
+                            var _a;
+                            const questionSetId = ((_a = q.setId) === null || _a === void 0 ? void 0 : _a._id) || q.setId;
+                            return questionSetId.toString() === setId.toString();
+                        });
+                        sameSetQuestions.sort((a, b) => a.questionNumber - b.questionNumber);
+                        sameSetQuestions.forEach((q, index) => {
+                            q.questionNumber = index + 1;
+                        });
+                    }
+                    catch (memoryReorderError) {
+                        console.error('Memory reorder error:', memoryReorderError);
+                    }
+                    res.json({
+                        success: true,
+                        message: 'Question deleted successfully (memory storage)'
                     });
                 }
-                res.json({
-                    success: true,
-                    message: 'Question deleted and numbers reordered successfully'
-                });
             }
             catch (error) {
                 console.error('Delete question error:', error);
