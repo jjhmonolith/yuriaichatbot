@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle, AlertCircle, RefreshCw, Zap, Activity } from 'lucide-react';
+import Button from '@/components/ui/Button';
 
 interface ExplanationStatusSummaryProps {
   setId: string;
@@ -29,18 +30,14 @@ const ExplanationStatusSummary: React.FC<ExplanationStatusSummaryProps> = ({
   const [statusSummary, setStatusSummary] = useState<StatusSummary | null>(null);
   const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchStatusSummary();
     fetchQueueStatus();
     
-    // 백그라운드 작업이 있으면 폴링 시작
-    const interval = setInterval(() => {
-      fetchStatusSummary();
-      fetchQueueStatus();
-    }, 3000);
-
-    return () => clearInterval(interval);
+    // 백그라운드 작업이 있으면 폴링 시작 (자동 새로고침은 제거)
+    // 사용자가 수동으로 새로고침 버튼을 클릭하여 상태 확인하도록 변경
   }, [setId]);
 
   const fetchStatusSummary = async () => {
@@ -76,6 +73,18 @@ const ExplanationStatusSummary: React.FC<ExplanationStatusSummaryProps> = ({
     }
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        fetchStatusSummary(),
+        fetchQueueStatus()
+      ]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (!statusSummary) {
     return null;
   }
@@ -94,8 +103,20 @@ const ExplanationStatusSummary: React.FC<ExplanationStatusSummaryProps> = ({
           <Activity className="h-5 w-5 text-blue-600" />
           <h3 className="text-lg font-semibold text-gray-900">AI 해설 생성 진행 상황</h3>
         </div>
-        <div className="text-sm text-gray-500">
-          {statusSummary.completed} / {statusSummary.total} 완료
+        <div className="flex items-center space-x-3">
+          <div className="text-sm text-gray-500">
+            {statusSummary.completed} / {statusSummary.total} 완료
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center space-x-1"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="text-xs">{isRefreshing ? '새로고침 중...' : '새로고침'}</span>
+          </Button>
         </div>
       </div>
 
@@ -171,7 +192,7 @@ const ExplanationStatusSummary: React.FC<ExplanationStatusSummaryProps> = ({
         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
             <Zap className="inline h-4 w-4 mr-1" />
-            AI가 백그라운드에서 문제 해설을 생성하고 있습니다. 페이지를 새로고침하지 않아도 자동으로 업데이트됩니다.
+            AI가 백그라운드에서 문제 해설을 생성하고 있습니다. 위의 새로고침 버튼을 눌러 진행 상황을 확인하세요.
           </p>
         </div>
       )}

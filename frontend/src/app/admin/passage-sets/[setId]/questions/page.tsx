@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
-import { Plus, Edit, Trash2, HelpCircle, Search, ArrowLeft, BookOpen, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, HelpCircle, Search, ArrowLeft, BookOpen, Upload, RefreshCw } from 'lucide-react';
 import { Question } from '@/types/common';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
@@ -37,6 +37,7 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
   const [formLoading, setFormLoading] = useState(false);
   const [isCsvUploadOpen, setIsCsvUploadOpen] = useState(false);
   const [hasActiveGeneration, setHasActiveGeneration] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchPassageSetAndQuestions();
@@ -219,9 +220,17 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
   };
 
   const handleQuestionStatusChange = (questionId: string, status: string) => {
-    if (status === 'completed') {
-      // 해설이 완료되면 문제 목록 새로고침
-      fetchPassageSetAndQuestions();
+    // 자동 새로고침 제거 - 사용자가 작업 중인 내용을 잃지 않도록 하기 위해
+    // 사용자가 수동으로 새로고침하여 완료된 해설을 확인하도록 변경
+    console.log(`Question ${questionId} status changed to ${status}`);
+  };
+
+  const handleRefreshPage = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchPassageSetAndQuestions();
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -277,6 +286,15 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              onClick={handleRefreshPage}
+              disabled={isRefreshing}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? '새로고침 중...' : '새로고침'}</span>
+            </Button>
             <Button
               variant="outline"
               onClick={() => setIsCsvUploadOpen(true)}

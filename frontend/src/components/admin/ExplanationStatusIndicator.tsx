@@ -26,14 +26,8 @@ const ExplanationStatusIndicator: React.FC<ExplanationStatusIndicatorProps> = ({
   }, [status]);
 
   useEffect(() => {
-    // 백그라운드 작업 상태가 pending 또는 generating인 경우 폴링 시작
-    if (currentStatus === 'pending' || currentStatus === 'generating') {
-      startPolling();
-    } else {
-      stopPolling();
-    }
-
-    return () => stopPolling();
+    // 자동 폴링 제거 - 사용자가 수동으로 새로고침하여 상태 확인하도록 변경
+    // 작업 중인 내용이 날아가는 것을 방지하기 위해 자동 새로고침 비활성화
   }, [currentStatus]);
 
   const startPolling = () => {
