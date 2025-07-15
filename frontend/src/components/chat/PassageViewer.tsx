@@ -103,9 +103,9 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                       [&>strong]:font-bold [&>strong]:text-blue-900
                       [&>em]:italic [&>em]:text-blue-700
                       [&>code]:text-xs [&>code]:text-purple-600 [&>code]:bg-purple-50 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
-                      [&>ul]:text-sm [&>ul]:text-blue-800 [&>ul]:mb-2 [&>ul]:pl-4
-                      [&>ol]:text-sm [&>ol]:text-blue-800 [&>ol]:mb-2 [&>ol]:pl-4  
-                      [&>li]:text-blue-800 [&>li]:mb-1
+                      [&>ul]:text-sm [&>ul]:text-blue-800 [&>ul]:mb-2 [&>ul]:pl-4 [&>ul]:list-disc
+                      [&>ol]:text-sm [&>ol]:text-blue-800 [&>ol]:mb-2 [&>ol]:pl-4 [&>ol]:list-decimal
+                      [&>li]:text-blue-800 [&>li]:mb-1 [&>li]:list-item
                       [&>blockquote]:border-l-4 [&>blockquote]:border-blue-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-blue-600">
                       <ReactMarkdown>{set.passageComment}</ReactMarkdown>
                     </div>
@@ -153,9 +153,9 @@ export default function PassageViewer({ passageData }: PassageViewerProps) {
                           [&>strong]:font-bold [&>strong]:text-purple-900
                           [&>em]:italic [&>em]:text-purple-700
                           [&>code]:text-xs [&>code]:text-purple-600 [&>code]:bg-purple-100 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
-                          [&>ul]:text-xs [&>ul]:text-purple-800 [&>ul]:mb-1 [&>ul]:pl-3
-                          [&>ol]:text-xs [&>ol]:text-purple-800 [&>ol]:mb-1 [&>ol]:pl-3  
-                          [&>li]:text-purple-800 [&>li]:mb-0.5
+                          [&>ul]:text-xs [&>ul]:text-purple-800 [&>ul]:mb-1 [&>ul]:pl-3 [&>ul]:list-disc
+                          [&>ol]:text-xs [&>ol]:text-purple-800 [&>ol]:mb-1 [&>ol]:pl-3 [&>ol]:list-decimal
+                          [&>li]:text-purple-800 [&>li]:mb-0.5 [&>li]:list-item
                           [&>blockquote]:border-l-4 [&>blockquote]:border-purple-300 [&>blockquote]:pl-3 [&>blockquote]:italic [&>blockquote]:text-purple-600">
                           <ReactMarkdown>{question.explanation}</ReactMarkdown>
                         </div>

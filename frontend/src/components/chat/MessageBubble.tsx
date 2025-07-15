@@ -54,9 +54,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               [&>strong]:font-bold [&>strong]:text-gray-900
               [&>em]:italic [&>em]:text-gray-700
               [&>code]:text-xs [&>code]:text-purple-600 [&>code]:bg-purple-50 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
-              [&>ul]:text-sm [&>ul]:text-gray-900 [&>ul]:mb-2 [&>ul]:pl-6
-              [&>ol]:text-sm [&>ol]:text-gray-900 [&>ol]:mb-2 [&>ol]:pl-6  
-              [&>li]:text-gray-900 [&>li]:mb-1
+              [&>ul]:text-sm [&>ul]:text-gray-900 [&>ul]:mb-2 [&>ul]:pl-6 [&>ul]:list-disc
+              [&>ol]:text-sm [&>ol]:text-gray-900 [&>ol]:mb-2 [&>ol]:pl-6 [&>ol]:list-decimal
+              [&>li]:text-gray-900 [&>li]:mb-1 [&>li]:list-item
               [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:text-sm">
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
