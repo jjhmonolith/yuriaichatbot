@@ -8,4 +8,7 @@ router.get('/', QuestionController_1.QuestionController.getQuestions);
 router.post('/', QuestionController_1.QuestionController.createQuestion);
 router.post('/bulk-upload', QuestionController_1.QuestionController.bulkUploadQuestions);
 router.put('/reorder', QuestionController_1.QuestionController.reorderQuestions);
+// 백그라운드 작업 관련 라우트
+router.get('/explanation-status', QuestionController_1.QuestionController.getSetExplanationStatus);
+router.get('/queue-status', QuestionController_1.QuestionController.getQueueStatus);
 exports.default = router;

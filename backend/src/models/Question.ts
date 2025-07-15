@@ -7,6 +7,9 @@ export interface IQuestion extends Document {
   options: string[];
   correctAnswer: string;
   explanation: string;
+  explanationStatus: 'pending' | 'generating' | 'completed' | 'failed';
+  explanationGeneratedAt?: Date;
+  explanationError?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -50,6 +53,21 @@ const questionSchema = new Schema<IQuestion>(
       required: [true, 'Explanation is required'],
       trim: true,
       maxLength: [2000, 'Explanation cannot exceed 2000 characters']
+    },
+    explanationStatus: {
+      type: String,
+      enum: ['pending', 'generating', 'completed', 'failed'],
+      default: 'pending'
+    },
+    explanationGeneratedAt: {
+      type: Date,
+      required: false
+    },
+    explanationError: {
+      type: String,
+      required: false,
+      trim: true,
+      maxLength: [500, 'Explanation error cannot exceed 500 characters']
     }
   },
   {

@@ -72,6 +72,21 @@ const questionSchema = new mongoose_1.Schema({
         required: [true, 'Explanation is required'],
         trim: true,
         maxLength: [2000, 'Explanation cannot exceed 2000 characters']
+    },
+    explanationStatus: {
+        type: String,
+        enum: ['pending', 'generating', 'completed', 'failed'],
+        default: 'pending'
+    },
+    explanationGeneratedAt: {
+        type: Date,
+        required: false
+    },
+    explanationError: {
+        type: String,
+        required: false,
+        trim: true,
+        maxLength: [500, 'Explanation error cannot exceed 500 characters']
     }
 }, {
     timestamps: true,

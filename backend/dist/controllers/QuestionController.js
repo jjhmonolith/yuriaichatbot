@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuestionController = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const models_1 = require("../models");
-const AIService_1 = require("../services/AIService");
+const BackgroundJobService_1 = require("../services/BackgroundJobService");
 // 임시 메모리 저장소
 let memoryQuestions = [];
 let nextQuestionId = 1;
@@ -457,7 +457,7 @@ class QuestionController {
                         isActive: true
                     });
                     const createdQuestions = [];
-                    const aiGenerationErrors = [];
+                    const backgroundJobs = [];
                     for (let i = 0; i < csvQuestions.length; i++) {
                         const csvQuestion = csvQuestions[i];
                         console.log(`Processing question ${i + 1}:`, csvQuestion); // 디버깅 로그
@@ -479,28 +479,12 @@ class QuestionController {
                         const correctAnswer = csvQuestion.correctAnswer;
                         console.log(`Question ${i + 1} - Options:`, options, 'Correct Answer:', correctAnswer); // 디버깅 로그
                         let explanation = ((_a = csvQuestion.explanation) === null || _a === void 0 ? void 0 : _a.trim()) || '';
-                        console.log(`Question ${i + 1} - Explanation empty:`, !explanation); // 디버깅 로그
-                        // 해설이 비어있으면 AI로 생성
+                        let explanationStatus = 'completed';
+                        // 해설이 비어있으면 더미 해설 사용하고 백그라운드 작업 큐에 추가
                         if (!explanation) {
-                            console.log(`AI 해설 생성 시작 - 문제 ${i + 1}`);
-                            try {
-                                // 통일된 해설 생성 메서드 사용
-                                explanation = yield AIService_1.AIService.generateQuestionExplanation({
-                                    passageContent: passageSet.passage || '',
-                                    passageComment: passageSet.passageComment || '',
-                                    questionText: csvQuestion.questionText,
-                                    options,
-                                    correctAnswer,
-                                    subject: '국어',
-                                    level: '고등학교'
-                                });
-                                console.log(`AI 해설 생성 성공 - 문제 ${i + 1}, 길이: ${explanation.length}`);
-                            }
-                            catch (aiError) {
-                                console.error(`AI 해설 생성 실패 (문제 ${i + 1}):`, aiError);
-                                aiGenerationErrors.push(`문제 ${i + 1}: AI 해설 생성 실패 - ${aiError.message}`);
-                                explanation = '해설을 생성할 수 없습니다. 수동으로 입력해주세요.';
-                            }
+                            explanation = '🤖 AI 해설을 생성중입니다...\n\n잠시만 기다려주세요. 곧 상세한 해설이 업데이트됩니다.';
+                            explanationStatus = 'pending';
+                            console.log(`더미 해설 사용 - 문제 ${i + 1}, 백그라운드 작업 예약`);
                         }
                         else {
                             console.log(`기존 해설 사용 - 문제 ${i + 1}`);
@@ -511,7 +495,8 @@ class QuestionController {
                             questionText: csvQuestion.questionText.trim(),
                             options,
                             correctAnswer,
-                            explanation
+                            explanation,
+                            explanationStatus
                         };
                         console.log(`Creating question ${i + 1} with data:`, questionData); // 디버깅 로그
                         const question = new models_1.Question(questionData);
@@ -519,16 +504,32 @@ class QuestionController {
                         const populatedQuestion = yield models_1.Question.findById(question._id)
                             .populate('setId', 'title');
                         createdQuestions.push(populatedQuestion);
+                        // 해설이 비어있었던 경우 백그라운드 작업 큐에 추가
+                        if (explanationStatus === 'pending') {
+                            backgroundJobs.push({
+                                questionId: question._id.toString(),
+                                passageContent: passageSet.passage || '',
+                                passageComment: passageSet.passageComment || '',
+                                questionText: csvQuestion.questionText,
+                                options,
+                                correctAnswer
+                            });
+                        }
                     }
+                    // 백그라운드 작업 큐에 해설 생성 작업 추가
+                    backgroundJobs.forEach(job => {
+                        BackgroundJobService_1.BackgroundJobService.addExplanationJob(job);
+                    });
                     let message = `${createdQuestions.length}개의 문제가 성공적으로 생성되었습니다.`;
-                    if (aiGenerationErrors.length > 0) {
-                        message += ` (AI 해설 생성 실패: ${aiGenerationErrors.length}건)`;
+                    if (backgroundJobs.length > 0) {
+                        message += ` (${backgroundJobs.length}개 문제의 AI 해설을 백그라운드에서 생성중입니다.)`;
                     }
                     res.status(201).json({
                         success: true,
                         data: createdQuestions,
                         message,
-                        aiGenerationErrors: aiGenerationErrors.length > 0 ? aiGenerationErrors : undefined
+                        backgroundJobs: backgroundJobs.length,
+                        queueStatus: BackgroundJobService_1.BackgroundJobService.getQueueStatus()
                     });
                 }
                 catch (dbError) {
@@ -545,6 +546,90 @@ class QuestionController {
                 res.status(500).json({
                     success: false,
                     message: '일괄 업로드에 실패했습니다.',
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        });
+    }
+    // 백그라운드 작업 큐 상태 조회
+    static getQueueStatus(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const queueStatus = BackgroundJobService_1.BackgroundJobService.getQueueStatus();
+                res.json({
+                    success: true,
+                    data: queueStatus
+                });
+            }
+            catch (error) {
+                console.error('Get queue status error:', error);
+                res.status(500).json({
+                    success: false,
+                    message: 'Failed to get queue status',
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        });
+    }
+    // 특정 문제의 해설 생성 상태 조회
+    static getExplanationStatus(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { id } = req.params;
+                const status = yield BackgroundJobService_1.BackgroundJobService.getExplanationStatus(id);
+                if (!status) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Question not found'
+                    });
+                }
+                res.json({
+                    success: true,
+                    data: status
+                });
+            }
+            catch (error) {
+                console.error('Get explanation status error:', error);
+                res.status(500).json({
+                    success: false,
+                    message: 'Failed to get explanation status',
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        });
+    }
+    // 지문세트의 모든 문제 해설 상태 조회
+    static getSetExplanationStatus(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { setId } = req.params;
+                const questions = yield models_1.Question.find({ setId }, 'questionNumber explanationStatus explanationGeneratedAt explanationError').sort({ questionNumber: 1 });
+                const statusSummary = {
+                    total: questions.length,
+                    completed: questions.filter(q => q.explanationStatus === 'completed').length,
+                    generating: questions.filter(q => q.explanationStatus === 'generating').length,
+                    pending: questions.filter(q => q.explanationStatus === 'pending').length,
+                    failed: questions.filter(q => q.explanationStatus === 'failed').length
+                };
+                res.json({
+                    success: true,
+                    data: {
+                        summary: statusSummary,
+                        questions: questions.map(q => ({
+                            id: q._id,
+                            questionNumber: q.questionNumber,
+                            status: q.explanationStatus,
+                            generatedAt: q.explanationGeneratedAt,
+                            error: q.explanationError
+                        }))
+                    }
+                });
+            }
+            catch (error) {
+                console.error('Get set explanation status error:', error);
+                res.status(500).json({
+                    success: false,
+                    message: 'Failed to get set explanation status',
                     error: error instanceof Error ? error.message : 'Unknown error'
                 });
             }

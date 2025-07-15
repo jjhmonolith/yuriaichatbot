@@ -9,6 +9,8 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import QuestionForm from '@/components/admin/QuestionForm';
 import CsvUploadModal from '@/components/admin/CsvUploadModal';
+import ExplanationStatusIndicator from '@/components/admin/ExplanationStatusIndicator';
+import ExplanationStatusSummary from '@/components/admin/ExplanationStatusSummary';
 
 interface PassageSet {
   _id: string;
@@ -34,6 +36,7 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [isCsvUploadOpen, setIsCsvUploadOpen] = useState(false);
+  const [hasActiveGeneration, setHasActiveGeneration] = useState(false);
 
   useEffect(() => {
     fetchPassageSetAndQuestions();
@@ -211,6 +214,17 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
     }
   };
 
+  const handleStatusUpdate = (summary: any) => {
+    setHasActiveGeneration(summary.pending > 0 || summary.generating > 0);
+  };
+
+  const handleQuestionStatusChange = (questionId: string, status: string) => {
+    if (status === 'completed') {
+      // 해설이 완료되면 문제 목록 새로고침
+      fetchPassageSetAndQuestions();
+    }
+  };
+
   if (loading) {
     return (
       <div className="px-6 mx-auto max-w-7xl">
@@ -281,6 +295,12 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
           </div>
         </div>
       </div>
+
+      {/* Explanation Status Summary */}
+      <ExplanationStatusSummary 
+        setId={params.setId} 
+        onStatusUpdate={handleStatusUpdate}
+      />
 
       {/* Passage Set Info */}
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -371,7 +391,16 @@ export default function PassageSetQuestionsPage({ params }: { params: { setId: s
                     </div>
 
                     <div className="bg-blue-50 p-3 rounded-lg">
-                      <div className="text-sm font-medium text-blue-900 mb-1">해설:</div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-medium text-blue-900">해설:</div>
+                        <ExplanationStatusIndicator 
+                          questionId={question._id}
+                          status={question.explanationStatus || 'completed'}
+                          generatedAt={question.explanationGeneratedAt}
+                          error={question.explanationError}
+                          onStatusChange={handleQuestionStatusChange}
+                        />
+                      </div>
                       <div className="prose max-w-none
                         [&>h1]:!text-lg [&>h1]:!font-bold [&>h1]:!text-blue-900 [&>h1]:mb-2 [&>h1]:mt-3
                         [&>h2]:!text-base [&>h2]:!font-bold [&>h2]:!text-blue-900 [&>h2]:mb-2 [&>h2]:mt-3  

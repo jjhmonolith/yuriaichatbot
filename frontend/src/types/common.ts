@@ -54,6 +54,9 @@ export interface Question {
   options: string[];
   correctAnswer: string;
   explanation: string;
+  explanationStatus?: 'pending' | 'generating' | 'completed' | 'failed';
+  explanationGeneratedAt?: string;
+  explanationError?: string;
   createdAt: string;
   updatedAt: string;
 }

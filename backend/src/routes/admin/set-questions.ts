@@ -9,4 +9,8 @@ router.post('/', QuestionController.createQuestion);
 router.post('/bulk-upload', QuestionController.bulkUploadQuestions);
 router.put('/reorder', QuestionController.reorderQuestions);
 
+// 백그라운드 작업 관련 라우트
+router.get('/explanation-status', QuestionController.getSetExplanationStatus);
+router.get('/queue-status', QuestionController.getQueueStatus);
+
 export default router;
