@@ -233,7 +233,7 @@ ${questionsText}
     try {
       // OpenAI API 호출
       const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o', // 지문 해설 생성용 고품질 모델
         messages: [
           { role: 'system', content: systemPrompt }
         ],
@@ -320,7 +320,7 @@ ${questionsText}
 
       // OpenAI API 호출
       const response = await client.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o', // 해설 생성용 고품질 모델
         messages: [
           { role: 'system', content: finalPrompt }
         ],
