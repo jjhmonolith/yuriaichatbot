@@ -72,7 +72,9 @@ export default function BottomDrawer({
     setStartSize(drawerSize);
     
     // 드래그 중 선택 방지
-    document.body.style.userSelect = 'none';
+    if (typeof window !== 'undefined') {
+      document.body.style.userSelect = 'none';
+    }
   };
 
   // 드래그 중
@@ -98,7 +100,9 @@ export default function BottomDrawer({
   // 드래그 종료
   const handleDragEnd = () => {
     setIsDragging(false);
-    document.body.style.userSelect = '';
+    if (typeof window !== 'undefined') {
+      document.body.style.userSelect = '';
+    }
     
     // 닫힌 상태에서는 드로어 완전히 닫기
     if (drawerSize === 'closed') {
@@ -132,12 +136,12 @@ export default function BottomDrawer({
 
   // 드래그 이벤트 리스너
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleDragMove);
-      document.addEventListener('mouseup', handleDragEnd);
-      document.addEventListener('touchmove', handleDragMove);
-      document.addEventListener('touchend', handleDragEnd);
-    }
+    if (typeof window === 'undefined' || !isDragging) return;
+    
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchmove', handleDragMove);
+    document.addEventListener('touchend', handleDragEnd);
 
     return () => {
       document.removeEventListener('mousemove', handleDragMove);
@@ -145,7 +149,7 @@ export default function BottomDrawer({
       document.removeEventListener('touchmove', handleDragMove);
       document.removeEventListener('touchend', handleDragEnd);
     };
-  }, [isDragging, startY, startHeight]);
+  }, [isDragging, startY, startSize]);
 
   if (!isOpen) return null;
 
