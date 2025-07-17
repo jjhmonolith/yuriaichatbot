@@ -18,7 +18,7 @@ export default function BottomDrawer({
   passageData, 
   children 
 }: BottomDrawerProps) {
-  type DrawerSize = 'closed' | 'standard' | 'full';
+  type DrawerSize = 'closed' | 'standard';
   const [drawerSize, setDrawerSize] = useState<DrawerSize>('standard');
   const [isDragging, setIsDragging] = useState(false);
   const [startY, setStartY] = useState(0);
@@ -27,17 +27,15 @@ export default function BottomDrawer({
   const drawerRef = useRef<HTMLDivElement>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
 
-  // 3단계 높이 정의
+  // 2단계 높이 정의
   const getHeight = (size: DrawerSize): number => {
     switch (size) {
       case 'closed':
         return 0; // 완전히 닫힌 상태
       case 'standard':
-        return Math.min(maxHeight * 0.7, maxHeight - 100); // 화면의 70%
-      case 'full':
-        return maxHeight; // 전체 높이
+        return Math.min(maxHeight * 0.85, maxHeight - 50); // 화면의 85%
       default:
-        return maxHeight * 0.7;
+        return maxHeight * 0.85;
     }
   };
   
@@ -91,15 +89,12 @@ export default function BottomDrawer({
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const deltaY = startY - clientY; // 위로 드래그시 양수
     
-    // 드래그 거리에 따라 단계 결정
-    if (deltaY > 100) {
-      // 위로 많이 드래그 -> 전체
-      setDrawerSize('full');
-    } else if (deltaY < -100) {
+    // 드래그 거리에 따라 단계 결정 (단순화)
+    if (deltaY < -100) {
       // 아래로 많이 드래그 -> 닫기
       setDrawerSize('closed');
-    } else if (Math.abs(deltaY) < 50) {
-      // 작은 움직임 -> 표준
+    } else {
+      // 그 외의 경우 -> 표준 크기 유지
       setDrawerSize('standard');
     }
   };
@@ -118,18 +113,7 @@ export default function BottomDrawer({
     }
   };
 
-  // 크기 조절 버튼들 (드래그로만 조절)
-  const handleSizeUp = () => {
-    if (drawerSize === 'standard') {
-      setDrawerSize('full');
-    }
-  };
-
-  const handleSizeDown = () => {
-    if (drawerSize === 'full') {
-      setDrawerSize('standard');
-    }
-  };
+  // 크기 조절 버튼들 제거 (이제 드래그로만 닫기만 가능)
 
   // 배경 클릭 시 닫기
   const handleBackgroundClick = (e: React.MouseEvent) => {
