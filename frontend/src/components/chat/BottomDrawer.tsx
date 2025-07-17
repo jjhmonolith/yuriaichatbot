@@ -55,14 +55,22 @@ export default function BottomDrawer({
     }
   }, []);
 
-  // 드로어가 열릴 때 초기 크기 설정
+  // 드로어가 열릴 때 초기 크기 설정 및 배경 스크롤 방지
   useEffect(() => {
     if (isOpen) {
       setDrawerSize('standard');
+      // 드로어 열릴 때 배경 스크롤 비활성화
+      if (typeof window !== 'undefined') {
+        document.body.style.overflow = 'hidden';
+      }
     } else {
       // 드로어가 닫힐 때 완전히 리셋
       setDrawerSize('closed');
       setIsDragging(false);
+      // 드로어 닫힐 때 배경 스크롤 복원
+      if (typeof window !== 'undefined') {
+        document.body.style.overflow = '';
+      }
     }
   }, [isOpen]);
 
@@ -122,6 +130,19 @@ export default function BottomDrawer({
     }
   };
 
+  // 드로어 내부 스크롤 이벤트 전파 방지
+  const handleDrawerScroll = (e: React.UIEvent | React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
+  // 드로어 터치 이벤트 전파 방지 (드래그 핸들 제외)
+  const handleDrawerTouch = (e: React.TouchEvent) => {
+    // 드래그 핸들이 아닌 영역에서만 전파 방지
+    if (dragHandleRef.current && !dragHandleRef.current.contains(e.target as Node)) {
+      e.stopPropagation();
+    }
+  };
+
   // 드래그 이벤트 리스너
   useEffect(() => {
     if (typeof window === 'undefined' || !isDragging) return;
@@ -159,6 +180,9 @@ export default function BottomDrawer({
           height: `${currentHeight}px`,
           transform: isOpen ? 'translateY(0)' : 'translateY(100%)'
         }}
+        onTouchMove={handleDrawerTouch}
+        onTouchStart={handleDrawerTouch}
+        onTouchEnd={handleDrawerTouch}
       >
         {/* 드래그 핸들 */}
         <div
@@ -181,7 +205,14 @@ export default function BottomDrawer({
         </div>
 
         {/* 컨텐츠 영역 */}
-        <div className="flex-1 overflow-hidden" style={{ height: `${currentHeight - 44}px` }}>
+        <div 
+          className="flex-1 overflow-hidden" 
+          style={{ height: `${currentHeight - 44}px` }}
+          onScroll={handleDrawerScroll}
+          onTouchMove={handleDrawerTouch}
+          onTouchStart={handleDrawerTouch}
+          onTouchEnd={handleDrawerTouch}
+        >
           {children}
         </div>
       </div>
