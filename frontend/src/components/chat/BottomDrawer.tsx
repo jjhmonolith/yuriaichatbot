@@ -61,19 +61,25 @@ export default function BottomDrawer({
   useEffect(() => {
     if (isOpen) {
       setDrawerSize('standard');
+    } else {
+      // 드로어가 닫힐 때 완전히 리셋
+      setDrawerSize('closed');
+      setIsDragging(false);
     }
   }, [isOpen]);
 
   // 드래그 시작
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault(); // 기본 동작 방지
     setIsDragging(true);
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     setStartY(clientY);
     setStartSize(drawerSize);
     
-    // 드래그 중 선택 방지
+    // 드래그 중 선택 방지 및 배경 스크롤 방지
     if (typeof window !== 'undefined') {
       document.body.style.userSelect = 'none';
+      document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
     }
   };
 
@@ -81,6 +87,7 @@ export default function BottomDrawer({
   const handleDragMove = (e: MouseEvent | TouchEvent) => {
     if (!isDragging) return;
     
+    e.preventDefault(); // 기본 동작 방지
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const deltaY = startY - clientY; // 위로 드래그시 양수
     
@@ -102,6 +109,7 @@ export default function BottomDrawer({
     setIsDragging(false);
     if (typeof window !== 'undefined') {
       document.body.style.userSelect = '';
+      document.body.style.overflow = ''; // 배경 스크롤 복원
     }
     
     // 닫힌 상태에서는 드로어 완전히 닫기

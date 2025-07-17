@@ -33,7 +33,10 @@ export default function ChatPage() {
   
   const closeDrawer = () => {
     setDrawerOpen(false);
-    setDrawerType(null);
+    // 약간의 딜레이 후 타입 리셋으로 상태 충돌 방지
+    setTimeout(() => {
+      setDrawerType(null);
+    }, 100);
   };
 
   // 메시지 추가 시 스크롤 하단으로
