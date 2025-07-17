@@ -19,6 +19,8 @@ export default function ChatPage() {
   // 드로어 상태 관리
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
+  // 모바일 viewport 높이 관리
+  const [viewportHeight, setViewportHeight] = useState(0);
   
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
@@ -33,11 +35,39 @@ export default function ChatPage() {
   
   const closeDrawer = () => {
     setDrawerOpen(false);
-    // 약간의 딜레이 후 타입 리셋으로 상태 충돌 방지
-    setTimeout(() => {
-      setDrawerType(null);
-    }, 100);
+    // 드로어 타입을 즉시 리셋하여 버튼 클릭 문제 해결
+    setDrawerType(null);
   };
+
+  // 모바일 viewport 높이 관리
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      if (typeof window !== 'undefined') {
+        // 실제 보이는 viewport 높이 계산
+        const vh = window.innerHeight;
+        setViewportHeight(vh);
+        
+        // CSS 변수로 설정하여 전체 앱에서 사용 가능
+        document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
+      }
+    };
+
+    updateViewportHeight();
+    
+    // 모바일에서 주소창 숨김/표시 등으로 인한 높이 변경 감지
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', updateViewportHeight);
+      window.addEventListener('orientationchange', updateViewportHeight);
+      // 모바일 브라우저에서 스크롤 시 주소창 변경 감지
+      window.addEventListener('scroll', updateViewportHeight);
+      
+      return () => {
+        window.removeEventListener('resize', updateViewportHeight);
+        window.removeEventListener('orientationchange', updateViewportHeight);
+        window.removeEventListener('scroll', updateViewportHeight);
+      };
+    }
+  }, []);
 
   // 메시지 추가 시 스크롤 하단으로
   useEffect(() => {
@@ -49,7 +79,13 @@ export default function ChatPage() {
   // 로딩 상태
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+      <div 
+        className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center"
+        style={{ 
+          minHeight: viewportHeight || '100vh',
+          height: viewportHeight || '100vh'
+        }}
+      >
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 text-blue-600 animate-spin mb-4" />
           <p className="text-gray-600">학습 자료를 불러오는 중...</p>
@@ -61,7 +97,13 @@ export default function ChatPage() {
   // 에러 상태
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+      <div 
+        className="bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center"
+        style={{ 
+          minHeight: viewportHeight || '100vh',
+          height: viewportHeight || '100vh'
+        }}
+      >
         <div className="text-center p-8">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">오류가 발생했습니다</h2>
@@ -82,8 +124,19 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <div className="max-w-4xl mx-auto h-screen flex flex-col">
+    <div 
+      className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+      style={{ 
+        minHeight: viewportHeight || '100vh',
+        height: viewportHeight || '100vh'
+      }}
+    >
+      <div 
+        className="max-w-4xl mx-auto flex flex-col"
+        style={{ 
+          height: viewportHeight || '100vh'
+        }}
+      >
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">

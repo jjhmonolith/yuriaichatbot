@@ -33,3 +33,37 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* 모바일 viewport 높이 설정 */
+:root {
+  --vh: 1vh;
+}
+
+/* 모바일 브라우저 최적화 */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  /* 모바일 브라우저 zoom 방지 */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 모바일 safe area 고려 */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* 모바일 viewport 단위 폴백 */
+.min-h-screen-mobile {
+  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+
+.h-screen-mobile {
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+}
