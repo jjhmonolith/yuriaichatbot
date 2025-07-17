@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useChat } from '@/hooks/useChat';
 import MessageBubble from '@/components/chat/MessageBubble';
-import ChatInput from '@/components/chat/ChatInput';
-import PassageViewer from '@/components/chat/PassageViewer';
+import ChatInputWithButtons from '@/components/chat/ChatInputWithButtons';
+import BottomDrawer from '@/components/chat/BottomDrawer';
+import PassageDrawerContent from '@/components/chat/PassageDrawerContent';
+import QuestionsDrawerContent from '@/components/chat/QuestionsDrawerContent';
 import { Loader2, AlertCircle, Bot } from 'lucide-react';
 
 export default function ChatPage() {
@@ -13,6 +15,26 @@ export default function ChatPage() {
   const qrCode = params.qrCode as string;
   const { session, passageData, loading, error, sendingMessage, sendMessage } = useChat(qrCode);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // 드로어 상태 관리
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
+  
+  // 드로어 열기 함수들
+  const openPassageDrawer = () => {
+    setDrawerType('passage');
+    setDrawerOpen(true);
+  };
+  
+  const openQuestionsDrawer = () => {
+    setDrawerType('questions');
+    setDrawerOpen(true);
+  };
+  
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setDrawerType(null);
+  };
 
   // 메시지 추가 시 스크롤 하단으로
   useEffect(() => {
@@ -59,8 +81,6 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       <div className="max-w-4xl mx-auto h-screen flex flex-col">
-        {/* Passage Viewer */}
-        <PassageViewer passageData={passageData} />
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -108,13 +128,31 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input */}
-        <ChatInput
+        {/* Chat Input with Buttons */}
+        <ChatInputWithButtons
           onSend={sendMessage}
+          onOpenPassage={openPassageDrawer}
+          onOpenQuestions={openQuestionsDrawer}
           disabled={sendingMessage}
           placeholder="지문에 대해 궁금한 것을 질문해보세요..."
+          questionsCount={passageData?.questions?.length || 0}
         />
       </div>
+      
+      {/* Bottom Drawer */}
+      <BottomDrawer
+        isOpen={drawerOpen}
+        onClose={closeDrawer}
+        type={drawerType}
+        passageData={passageData}
+      >
+        {drawerType === 'passage' && (
+          <PassageDrawerContent passageData={passageData} />
+        )}
+        {drawerType === 'questions' && (
+          <QuestionsDrawerContent questions={passageData?.questions || []} />
+        )}
+      </BottomDrawer>
     </div>
   );
 }
