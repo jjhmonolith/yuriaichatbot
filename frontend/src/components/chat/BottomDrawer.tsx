@@ -31,13 +31,13 @@ export default function BottomDrawer({
   const getHeight = (size: DrawerSize): number => {
     switch (size) {
       case 'closed':
-        return 60; // 핸들만 보이는 높이
+        return 0; // 완전히 닫힌 상태
       case 'standard':
-        return Math.min(400, maxHeight * 0.5); // 화면의 50% 또는 400px
+        return Math.min(maxHeight * 0.7, maxHeight - 100); // 화면의 70%
       case 'full':
         return maxHeight; // 전체 높이
       default:
-        return 400;
+        return maxHeight * 0.7;
     }
   };
   
@@ -110,20 +110,16 @@ export default function BottomDrawer({
     }
   };
 
-  // 크기 조절 버튼들
+  // 크기 조절 버튼들 (드래그로만 조절)
   const handleSizeUp = () => {
     if (drawerSize === 'standard') {
       setDrawerSize('full');
-    } else if (drawerSize === 'closed') {
-      setDrawerSize('standard');
     }
   };
 
   const handleSizeDown = () => {
     if (drawerSize === 'full') {
       setDrawerSize('standard');
-    } else if (drawerSize === 'standard') {
-      setDrawerSize('closed');
     }
   };
 
@@ -175,60 +171,25 @@ export default function BottomDrawer({
         {/* 드래그 핸들 */}
         <div
           ref={dragHandleRef}
-          className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 cursor-row-resize"
+          className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 cursor-row-resize flex items-center justify-center py-2"
           onMouseDown={handleDragStart}
           onTouchStart={handleDragStart}
         >
           {/* 드래그 인디케이터 */}
-          <div className="flex items-center justify-center py-2">
-            <GripHorizontal className="w-5 h-5 text-gray-400" />
-          </div>
+          <GripHorizontal className="w-5 h-5 text-gray-400" />
           
-          {/* 헤더 */}
-          <div className="flex items-center justify-between px-4 pb-2">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {type === 'passage' ? '지문' : '문제'}
-              </h3>
-              <span className="text-sm text-gray-500">
-                {type === 'passage' ? passageData?.set?.title : `총 ${passageData?.questions?.length || 0}개`}
-              </span>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              {/* 크기 조절 버튼들 */}
-              <button
-                onClick={handleSizeUp}
-                disabled={drawerSize === 'full'}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded disabled:opacity-50"
-                title="크기 늘리기"
-              >
-                <ChevronUp className="w-4 h-4" />
-              </button>
-              
-              <button
-                onClick={handleSizeDown}
-                disabled={drawerSize === 'closed'}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded disabled:opacity-50"
-                title="크기 줄이기"
-              >
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              
-              {/* 닫기 버튼 */}
-              <button
-                onClick={onClose}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                title="닫기"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          {/* 닫기 버튼 (우측 상단) */}
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded"
+            title="닫기"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* 컨텐츠 영역 */}
-        <div className="flex-1 overflow-hidden" style={{ height: `${currentHeight - 60}px` }}>
+        <div className="flex-1 overflow-hidden" style={{ height: `${currentHeight - 44}px` }}>
           {children}
         </div>
       </div>
