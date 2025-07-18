@@ -154,7 +154,7 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-full text-sm font-medium
                        shadow-2xl hover:bg-blue-700 transition-all duration-200 backdrop-blur-sm
                        border-2 border-blue-500 cursor-pointer touch-manipulation min-h-[48px]
-                       hover:scale-105 active:scale-95 pointer-events-auto select-none"
+                       hover:scale-105 active:scale-95 pointer-events-auto select-none floating-question-button"
             style={{ 
               userSelect: 'none',
               WebkitUserSelect: 'none',
@@ -163,7 +163,10 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
               WebkitTouchCallout: 'none',
               WebkitTapHighlightColor: 'transparent',
               position: 'relative',
-              zIndex: 10000
+              zIndex: 10001,
+              isolation: 'isolate',
+              backgroundColor: '#2563eb',
+              borderColor: '#3b82f6'
             }}
           >
             <MessageSquare className="w-4 h-4 flex-shrink-0 pointer-events-none" />

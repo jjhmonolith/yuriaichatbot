@@ -160,17 +160,39 @@ button {
 
 /* iOS 텍스트 선택 메뉴 방지 */
 ::selection {
-  background: transparent;
+  background: rgba(59, 130, 246, 0.3);
+  color: inherit;
 }
 
 ::-moz-selection {
-  background: transparent;
+  background: rgba(59, 130, 246, 0.3);
+  color: inherit;
 }
 
 /* 플로팅 버튼 최상위 z-index */
 .floating-button-container {
   z-index: 9999 !important;
   position: fixed !important;
+}
+
+/* 플로팅 버튼이 텍스트 선택에 영향받지 않도록 */
+.floating-question-button {
+  z-index: 10001 !important;
+  position: relative !important;
+  isolation: isolate !important;
+  mix-blend-mode: normal !important;
+}
+
+.floating-question-button::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: transparent;
+  z-index: -1;
+  border-radius: inherit;
 }
 
 /* 모바일 viewport 높이 설정 */
