@@ -55,7 +55,7 @@ export default function ChatInputWithButtons({
   return (
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className="flex items-end space-x-3 p-4">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-3 p-4">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -77,15 +77,15 @@ export default function ChatInputWithButtons({
         <button
           type="submit"
           disabled={!message.trim() || disabled}
-          className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl 
+          className="flex-shrink-0 w-11 h-11 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl 
                      hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed 
                      transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl
                      transform hover:scale-105 active:scale-95"
         >
           {disabled ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
           )}
         </button>
       </form>

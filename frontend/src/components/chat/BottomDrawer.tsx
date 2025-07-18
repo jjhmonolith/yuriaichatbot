@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, GripHorizontal, ChevronUp, ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface BottomDrawerProps {
   isOpen: boolean;
@@ -18,25 +18,13 @@ export default function BottomDrawer({
   passageData, 
   children 
 }: BottomDrawerProps) {
-  type DrawerSize = 'closed' | 'standard';
-  const [drawerSize, setDrawerSize] = useState<DrawerSize>('standard');
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [startSize, setStartSize] = useState<DrawerSize>('standard');
+  const [isClosing, setIsClosing] = useState(false);
   const [maxHeight, setMaxHeight] = useState(600); // 초기값
   const drawerRef = useRef<HTMLDivElement>(null);
-  const dragHandleRef = useRef<HTMLDivElement>(null);
 
-  // 2단계 높이 정의
-  const getHeight = (size: DrawerSize): number => {
-    switch (size) {
-      case 'closed':
-        return 0; // 완전히 닫힌 상태
-      case 'standard':
-        return Math.min(maxHeight * 0.85, maxHeight - 50); // 화면의 85%
-      default:
-        return maxHeight * 0.85;
-    }
+  // 드로어 높이 계산
+  const getHeight = (): number => {
+    return Math.min(maxHeight * 0.85, maxHeight - 50); // 화면의 85%
   };
   
   // 컴포넌트 마운트 시 maxHeight 설정 및 화면 크기 변경 감지
@@ -55,18 +43,15 @@ export default function BottomDrawer({
     }
   }, []);
 
-  // 드로어가 열릴 때 초기 크기 설정 및 배경 스크롤 방지
+  // 드로어가 열릴 때 배경 스크롤 방지
   useEffect(() => {
     if (isOpen) {
-      setDrawerSize('standard');
+      setIsClosing(false);
       // 드로어 열릴 때 배경 스크롤 비활성화
       if (typeof window !== 'undefined') {
         document.body.style.overflow = 'hidden';
       }
     } else {
-      // 드로어가 닫힐 때 완전히 리셋
-      setDrawerSize('closed');
-      setIsDragging(false);
       // 드로어 닫힐 때 배경 스크롤 복원
       if (typeof window !== 'undefined') {
         document.body.style.overflow = '';
@@ -74,95 +59,25 @@ export default function BottomDrawer({
     }
   }, [isOpen]);
 
-  // 드래그 시작
-  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault(); // 기본 동작 방지
-    setIsDragging(true);
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    setStartY(clientY);
-    setStartSize(drawerSize);
-    
-    // 드래그 중 선택 방지 및 배경 스크롤 방지
-    if (typeof window !== 'undefined') {
-      document.body.style.userSelect = 'none';
-      document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
-    }
-  };
-
-  // 드래그 중
-  const handleDragMove = (e: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
-    
-    e.preventDefault(); // 기본 동작 방지
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = startY - clientY; // 위로 드래그시 양수
-    
-    // 드래그 거리에 따라 단계 결정 (단순화)
-    if (deltaY < -100) {
-      // 아래로 많이 드래그 -> 닫기
-      setDrawerSize('closed');
-    } else {
-      // 그 외의 경우 -> 표준 크기 유지
-      setDrawerSize('standard');
-    }
-  };
-
-  // 드래그 종료
-  const handleDragEnd = () => {
-    setIsDragging(false);
-    if (typeof window !== 'undefined') {
-      document.body.style.userSelect = '';
-      document.body.style.overflow = ''; // 배경 스크롤 복원
-    }
-    
-    // 닫힌 상태에서는 드로어 완전히 닫기
-    if (drawerSize === 'closed') {
+  // 애니메이션과 함께 닫기
+  const handleClose = () => {
+    setIsClosing(true);
+    // 애니메이션 시간 후 실제로 닫기
+    setTimeout(() => {
       onClose();
-    }
+    }, 300);
   };
 
-  // 크기 조절 버튼들 제거 (이제 드래그로만 닫기만 가능)
-
-  // 배경 클릭 시 닫기
+  // 배경 클릭 시 애니메이션과 함께 닫기
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      handleClose();
     }
   };
-
-  // 드로어 내부 스크롤 이벤트 전파 방지
-  const handleDrawerScroll = (e: React.UIEvent | React.TouchEvent) => {
-    e.stopPropagation();
-  };
-
-  // 드로어 터치 이벤트 전파 방지 (드래그 핸들 제외)
-  const handleDrawerTouch = (e: React.TouchEvent) => {
-    // 드래그 핸들이 아닌 영역에서만 전파 방지
-    if (dragHandleRef.current && !dragHandleRef.current.contains(e.target as Node)) {
-      e.stopPropagation();
-    }
-  };
-
-  // 드래그 이벤트 리스너
-  useEffect(() => {
-    if (typeof window === 'undefined' || !isDragging) return;
-    
-    document.addEventListener('mousemove', handleDragMove);
-    document.addEventListener('mouseup', handleDragEnd);
-    document.addEventListener('touchmove', handleDragMove);
-    document.addEventListener('touchend', handleDragEnd);
-
-    return () => {
-      document.removeEventListener('mousemove', handleDragMove);
-      document.removeEventListener('mouseup', handleDragEnd);
-      document.removeEventListener('touchmove', handleDragMove);
-      document.removeEventListener('touchend', handleDragEnd);
-    };
-  }, [isDragging, startY, startSize]);
 
   if (!isOpen) return null;
 
-  const currentHeight = getHeight(drawerSize);
+  const currentHeight = getHeight();
 
   return (
     <>
@@ -175,43 +90,35 @@ export default function BottomDrawer({
       {/* 드로어 */}
       <div
         ref={drawerRef}
-        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-xl z-50 transform transition-all duration-300"
+        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-xl z-50 transform transition-all duration-300 ease-out"
         style={{ 
           height: `${currentHeight}px`,
-          transform: isOpen ? 'translateY(0)' : 'translateY(100%)'
+          transform: (isOpen && !isClosing) ? 'translateY(0)' : 'translateY(100%)'
         }}
-        onTouchMove={handleDrawerTouch}
-        onTouchStart={handleDrawerTouch}
-        onTouchEnd={handleDrawerTouch}
       >
-        {/* 드래그 핸들 */}
-        <div
-          ref={dragHandleRef}
-          className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 cursor-row-resize flex items-center justify-center py-2"
-          onMouseDown={handleDragStart}
-          onTouchStart={handleDragStart}
-        >
-          {/* 드래그 인디케이터 */}
-          <GripHorizontal className="w-5 h-5 text-gray-400" />
+        {/* 헤더 영역 (닫기 버튼만) */}
+        <div className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 flex items-center justify-between px-4 py-3">
+          {/* 제목 영역 */}
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {type === 'passage' ? '지문' : '문제'}
+            </h3>
+          </div>
           
-          {/* 닫기 버튼 (우측 상단) */}
+          {/* 닫기 버튼 */}
           <button
-            onClick={onClose}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded"
+            onClick={handleClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             title="닫기"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 컨텐츠 영역 */}
         <div 
           className="flex-1 overflow-hidden" 
-          style={{ height: `${currentHeight - 44}px` }}
-          onScroll={handleDrawerScroll}
-          onTouchMove={handleDrawerTouch}
-          onTouchStart={handleDrawerTouch}
-          onTouchEnd={handleDrawerTouch}
+          style={{ height: `${currentHeight - 60}px` }}
         >
           {children}
         </div>
