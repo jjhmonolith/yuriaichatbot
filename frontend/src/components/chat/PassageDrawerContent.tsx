@@ -93,14 +93,15 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
               
               {/* 선택된 텍스트로 질문하기 버튼 */}
               {showQuestionButton && (
-                <div className="absolute top-2 right-2 z-10">
+                <div className="absolute top-2 right-2 z-20 pointer-events-auto">
                   <button
                     onClick={handleQuestionWithSelection}
                     className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium
-                               shadow-lg hover:bg-blue-700 transition-colors animate-pop-in"
+                               shadow-xl hover:bg-blue-700 transition-colors animate-pop-in backdrop-blur-sm
+                               border border-blue-500 cursor-pointer touch-manipulation"
                   >
-                    <MessageSquare className="w-3 h-3" />
-                    <span>선택한 부분 질문하기</span>
+                    <MessageSquare className="w-3 h-3 flex-shrink-0" />
+                    <span className="whitespace-nowrap">선택한 부분 질문하기</span>
                   </button>
                 </div>
               )}

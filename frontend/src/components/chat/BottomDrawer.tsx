@@ -22,9 +22,14 @@ export default function BottomDrawer({
   const [maxHeight, setMaxHeight] = useState(600); // 초기값
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  // 드로어 높이 계산
+  // 드로어 높이 계산 - 모바일에서 더 많은 공간 확보
   const getHeight = (): number => {
-    return Math.min(maxHeight * 0.85, maxHeight - 50); // 화면의 85%
+    // 모바일에서는 더 큰 높이 사용
+    const isMobile = maxHeight < 768;
+    if (isMobile) {
+      return Math.min(maxHeight * 0.75, maxHeight - 100); // 모바일: 75%, 더 많은 상단 여백
+    }
+    return Math.min(maxHeight * 0.85, maxHeight - 50); // 데스크톱: 85%
   };
   
   // 컴포넌트 마운트 시 maxHeight 설정 및 화면 크기 변경 감지
