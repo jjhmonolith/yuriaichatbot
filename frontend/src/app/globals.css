@@ -148,6 +148,16 @@ body {
   display: none;  /* Safari and Chrome */
 }
 
+/* 버튼 텍스트 선택 방지 */
+button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* 모바일 viewport 높이 설정 */
 :root {
   --vh: 1vh;

@@ -29,7 +29,10 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
   };
 
   // 선택된 텍스트로 질문하기
-  const handleQuestionWithSelection = () => {
+  const handleQuestionWithSelection = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (selectedText && onQuestionWithText) {
       onQuestionWithText(selectedText);
       setSelectedText('');
@@ -133,16 +136,25 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
       
       {/* 플로팅 질문하기 버튼 */}
       {showQuestionButton && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 animate-pop-in">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 animate-pop-in pointer-events-none">
           <button
             onClick={handleQuestionWithSelection}
+            onTouchStart={handleQuestionWithSelection}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-full text-sm font-medium
                        shadow-2xl hover:bg-blue-700 transition-all duration-300 backdrop-blur-sm
                        border border-blue-500 cursor-pointer touch-manipulation min-h-[48px]
-                       hover:scale-105 active:scale-95"
+                       hover:scale-105 active:scale-95 pointer-events-auto select-none"
+            style={{ 
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
-            <MessageSquare className="w-4 h-4 flex-shrink-0" />
-            <span className="whitespace-nowrap">선택한 부분 질문하기</span>
+            <MessageSquare className="w-4 h-4 flex-shrink-0 pointer-events-none" />
+            <span className="whitespace-nowrap pointer-events-none select-none">선택한 부분 질문하기</span>
           </button>
         </div>
       )}
