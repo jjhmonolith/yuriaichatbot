@@ -92,20 +92,6 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
               </div>
             </div>
             
-            {/* 선택된 텍스트로 질문하기 버튼 - 별도 영역으로 분리 */}
-            {showQuestionButton && (
-              <div className="flex justify-center mt-2">
-                <button
-                  onClick={handleQuestionWithSelection}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium
-                             shadow-xl hover:bg-blue-700 transition-colors animate-pop-in backdrop-blur-sm
-                             border border-blue-500 cursor-pointer touch-manipulation min-h-[44px]"
-                >
-                  <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">선택한 부분 질문하기</span>
-                </button>
-              </div>
-            )}
             
             {/* 도움말 텍스트 */}
             <div className="text-xs text-gray-500 px-2">
@@ -144,6 +130,22 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
           </div>
         )}
       </div>
+      
+      {/* 플로팅 질문하기 버튼 */}
+      {showQuestionButton && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 animate-pop-in">
+          <button
+            onClick={handleQuestionWithSelection}
+            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-full text-sm font-medium
+                       shadow-2xl hover:bg-blue-700 transition-all duration-300 backdrop-blur-sm
+                       border border-blue-500 cursor-pointer touch-manipulation min-h-[48px]
+                       hover:scale-105 active:scale-95"
+          >
+            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+            <span className="whitespace-nowrap">선택한 부분 질문하기</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
