@@ -65,10 +65,10 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* 문제 */}
         <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">
             문제 {currentQuestion.questionNumber}
           </h3>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
             {currentQuestion.questionText}
           </p>
         </div>

@@ -154,7 +154,7 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3 px-4 pt-2 pb-4">
+      <form onSubmit={handleSubmit} className="flex items-end space-x-3 px-4 pt-2 pb-4">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -190,7 +190,7 @@ export default function ChatInputWithButtons({
       </form>
 
       {/* 지문/문제 버튼 (glassmorphism style) */}
-      <div className="px-4 pb-4 flex space-x-3">
+      <div className="px-4 pb-4 pt-0 flex space-x-3">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
