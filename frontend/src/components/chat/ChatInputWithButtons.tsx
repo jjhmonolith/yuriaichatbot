@@ -29,6 +29,7 @@ export default function ChatInputWithButtons({
   const [message, setMessage] = useState(initialMessage);
   const [isReferenceExpanded, setIsReferenceExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const referenceBlockRef = useRef<HTMLDivElement>(null);
 
   // initialMessage가 변경될 때 message state 업데이트
   useEffect(() => {
@@ -75,16 +76,36 @@ export default function ChatInputWithButtons({
     }, 0);
   };
 
+  // 참조 블럭 확장/축소 시 스크롤 위치 조정
+  const handleReferenceToggle = () => {
+    if (!isReferenceExpanded) {
+      // 확장할 때: 현재 블럭의 하단 위치 기억
+      const currentBottom = referenceBlockRef.current?.getBoundingClientRect().bottom;
+      setIsReferenceExpanded(true);
+      
+      // 확장 후 스크롤 조정
+      setTimeout(() => {
+        if (currentBottom && referenceBlockRef.current) {
+          const newBottom = referenceBlockRef.current.getBoundingClientRect().bottom;
+          const heightDiff = newBottom - currentBottom;
+          window.scrollBy(0, heightDiff);
+        }
+      }, 50);
+    } else {
+      setIsReferenceExpanded(false);
+    }
+  };
+
   return (
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 참조 영역 배지 */}
       {reference && (
-        <div className="px-4 pt-3 pb-2">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
+        <div className="px-4 pt-3 pb-1">
+          <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
             <div className="flex items-center justify-between px-3 py-2">
               <button
-                onClick={() => setIsReferenceExpanded(!isReferenceExpanded)}
+                onClick={handleReferenceToggle}
                 className="flex items-center space-x-2 flex-1 text-left hover:bg-blue-100 transition-colors rounded p-1 -m-1"
                 type="button"
               >
@@ -111,10 +132,10 @@ export default function ChatInputWithButtons({
             {/* 확장 가능한 내용 영역 */}
             {isReferenceExpanded && (
               <div 
-                className="border-t border-blue-200 bg-white mx-2 mb-2 rounded transition-all duration-300"
-                style={{ maxHeight: '40vh' }}
+                className="border-t border-blue-200 bg-white mx-2 mb-2 rounded transition-all duration-300 overflow-hidden"
+                style={{ maxHeight: '30vh' }}
               >
-                <div className="p-3 max-h-full overflow-y-auto">
+                <div className="p-3 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {reference.text}
                   </p>
