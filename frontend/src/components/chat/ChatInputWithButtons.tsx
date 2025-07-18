@@ -79,18 +79,25 @@ export default function ChatInputWithButtons({
   // 참조 블럭 확장/축소 시 스크롤 위치 조정
   const handleReferenceToggle = () => {
     if (!isReferenceExpanded) {
-      // 확장할 때: 현재 블럭의 하단 위치 기억
+      // 확장할 때: 현재 블럭의 하단 위치와 뷰포트 하단 위치 기억
       const currentBottom = referenceBlockRef.current?.getBoundingClientRect().bottom;
+      const viewportHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      
       setIsReferenceExpanded(true);
       
-      // 확장 후 스크롤 조정
+      // 확장 후 스크롤 조정 - 더 긴 지연시간으로 DOM 업데이트 완료 보장
       setTimeout(() => {
         if (currentBottom && referenceBlockRef.current) {
           const newBottom = referenceBlockRef.current.getBoundingClientRect().bottom;
           const heightDiff = newBottom - currentBottom;
-          window.scrollBy(0, heightDiff);
+          
+          // 현재 블럭의 하단이 뷰포트 하단에 가까운 경우에만 스크롤 조정
+          if (currentBottom > viewportHeight * 0.7) {
+            window.scrollBy(0, heightDiff);
+          }
         }
-      }, 100);
+      }, 200);
     } else {
       setIsReferenceExpanded(false);
     }
@@ -100,7 +107,7 @@ export default function ChatInputWithButtons({
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 참조 영역 배지 */}
       {reference && (
-        <div className="px-4 pt-2 pb-0">
+        <div className="px-4 pt-2 pb-0 mb-0">
           <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
             <div className="flex items-center justify-between px-3 py-2">
@@ -135,7 +142,7 @@ export default function ChatInputWithButtons({
                 className="border-t border-blue-200 bg-white mx-2 mb-2 rounded transition-all duration-300 overflow-hidden"
                 style={{ maxHeight: '30vh' }}
               >
-                <div className="p-3 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="p-3 overflow-y-auto scrollbar-thin" style={{ maxHeight: '30vh' }}>
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {reference.text}
                   </p>
@@ -147,7 +154,7 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3 p-4">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-3 px-4 pt-2 pb-4">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
