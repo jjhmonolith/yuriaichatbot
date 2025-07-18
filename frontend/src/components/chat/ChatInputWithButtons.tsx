@@ -69,7 +69,7 @@ export default function ChatInputWithButtons({
                        bg-white/20 backdrop-blur-sm text-gray-900 placeholder-gray-600
                        focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 
                        disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-200
-                       shadow-lg text-sm placeholder:text-sm"
+                       shadow-lg text-base placeholder:text-base"
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
         </div>

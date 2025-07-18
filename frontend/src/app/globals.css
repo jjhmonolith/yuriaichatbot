@@ -163,6 +163,15 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 모바일 input zoom 방지 */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+    -webkit-appearance: none;
+  }
+}
+
 /* 모바일 키보드 대응 제거 - 문제 발생으로 인해 삭제 */
 
 /* 모바일 safe area 고려 */
