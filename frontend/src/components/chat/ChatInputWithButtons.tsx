@@ -29,11 +29,13 @@ export default function ChatInputWithButtons({
   useEffect(() => {
     if (initialMessage) {
       setMessage(initialMessage);
-      // 텍스트영역 높이 자동 조절
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-      }
+      // 다음 프레임에서 텍스트영역 높이 자동 조절 (DOM 업데이트 완료 후)
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+        }
+      }, 10);
     }
   }, [initialMessage]);
 
@@ -60,10 +62,12 @@ export default function ChatInputWithButtons({
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
     
-    // 자동 높이 조절
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    // 자동 높이 조절 - 더 정확한 계산을 위해 작은 지연 추가
+    setTimeout(() => {
+      const textarea = e.target;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    }, 0);
   };
 
   return (

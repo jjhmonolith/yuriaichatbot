@@ -83,29 +83,29 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
             <div className="bg-gray-50 p-4 rounded-lg relative">
               <div 
                 ref={passageRef}
-                className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap select-text"
+                className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap select-text relative z-10"
                 onMouseUp={handleTextSelection}
                 onTouchEnd={handleTextSelection}
                 style={{ userSelect: 'text' }}
               >
                 {set?.passage || '지문 내용을 불러올 수 없습니다.'}
               </div>
-              
-              {/* 선택된 텍스트로 질문하기 버튼 */}
-              {showQuestionButton && (
-                <div className="absolute top-2 right-2 z-20 pointer-events-auto">
-                  <button
-                    onClick={handleQuestionWithSelection}
-                    className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium
-                               shadow-xl hover:bg-blue-700 transition-colors animate-pop-in backdrop-blur-sm
-                               border border-blue-500 cursor-pointer touch-manipulation"
-                  >
-                    <MessageSquare className="w-3 h-3 flex-shrink-0" />
-                    <span className="whitespace-nowrap">선택한 부분 질문하기</span>
-                  </button>
-                </div>
-              )}
             </div>
+            
+            {/* 선택된 텍스트로 질문하기 버튼 - 별도 영역으로 분리 */}
+            {showQuestionButton && (
+              <div className="flex justify-center mt-2">
+                <button
+                  onClick={handleQuestionWithSelection}
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium
+                             shadow-xl hover:bg-blue-700 transition-colors animate-pop-in backdrop-blur-sm
+                             border border-blue-500 cursor-pointer touch-manipulation min-h-[44px]"
+                >
+                  <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">선택한 부분 질문하기</span>
+                </button>
+              </div>
+            )}
             
             {/* 도움말 텍스트 */}
             <div className="text-xs text-gray-500 px-2">
