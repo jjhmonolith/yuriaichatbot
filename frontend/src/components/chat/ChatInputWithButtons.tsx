@@ -90,7 +90,7 @@ export default function ChatInputWithButtons({
           const heightDiff = newBottom - currentBottom;
           window.scrollBy(0, heightDiff);
         }
-      }, 50);
+      }, 100);
     } else {
       setIsReferenceExpanded(false);
     }
@@ -100,7 +100,7 @@ export default function ChatInputWithButtons({
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 참조 영역 배지 */}
       {reference && (
-        <div className="px-4 pt-3 pb-1">
+        <div className="px-4 pt-2 pb-0">
           <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
             <div className="flex items-center justify-between px-3 py-2">
