@@ -158,6 +158,21 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* iOS 텍스트 선택 메뉴 방지 */
+::selection {
+  background: transparent;
+}
+
+::-moz-selection {
+  background: transparent;
+}
+
+/* 플로팅 버튼 최상위 z-index */
+.floating-button-container {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+
 /* 모바일 viewport 높이 설정 */
 :root {
   --vh: 1vh;
