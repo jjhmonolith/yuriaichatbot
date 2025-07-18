@@ -154,8 +154,8 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className="flex items-center space-x-3 px-4 py-0">
-        <div className="flex-1 relative mb-3">
+      <form onSubmit={handleSubmit} className={`flex items-center space-x-3 px-4 ${!reference ? 'pt-3' : 'pt-0'}`}>
+        <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
             value={message}
@@ -179,7 +179,7 @@ export default function ChatInputWithButtons({
           className="flex-shrink-0 w-11 h-11 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl 
                      hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed 
                      transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl
-                     transform hover:scale-105 active:scale-95 mb-3"
+                     transform hover:scale-105 active:scale-95"
         >
           {disabled ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -190,7 +190,7 @@ export default function ChatInputWithButtons({
       </form>
 
       {/* 지문/문제 버튼 (glassmorphism style) */}
-      <div className="px-4 pb-3 flex space-x-3">
+      <div className="px-4 pb-3 pt-3 flex space-x-3">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
