@@ -180,6 +180,7 @@ export default function ChatInputWithButtons({
                      hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed 
                      transition-all duration-300 flex items-center justify-center
                      transform hover:scale-105 active:scale-95"
+          style={{ minHeight: '44px' }}
         >
           {disabled ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -190,7 +191,7 @@ export default function ChatInputWithButtons({
       </form>
 
       {/* 지문/문제 버튼 (glassmorphism style) */}
-      <div className="px-4 pb-3 flex space-x-3">
+      <div className="px-4 pb-3 pt-3 flex space-x-3">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
