@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, BookOpen, HelpCircle, X } from 'lucide-react';
+import { Send, Loader2, BookOpen, HelpCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ChatInputWithButtonsProps {
   onSend: (message: string, reference?: { text: string; type: string }) => void;
@@ -27,7 +27,7 @@ export default function ChatInputWithButtons({
   onClearReference
 }: ChatInputWithButtonsProps) {
   const [message, setMessage] = useState(initialMessage);
-  const [showReferenceModal, setShowReferenceModal] = useState(false);
+  const [isReferenceExpanded, setIsReferenceExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // initialMessage가 변경될 때 message state 업데이트
@@ -80,25 +80,47 @@ export default function ChatInputWithButtons({
       {/* 참조 영역 배지 */}
       {reference && (
         <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-            <button
-              onClick={() => setShowReferenceModal(true)}
-              className="flex items-center space-x-2 flex-1 text-left hover:bg-blue-100 transition-colors rounded p-1 -m-1"
-              type="button"
-            >
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium text-blue-700">선택 영역 참조</span>
-              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                {reference.type}
-              </span>
-            </button>
-            <button
-              onClick={onClearReference}
-              className="text-blue-400 hover:text-blue-600 transition-colors ml-2"
-              type="button"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
+            {/* 헤더 (항상 표시) */}
+            <div className="flex items-center justify-between px-3 py-2">
+              <button
+                onClick={() => setIsReferenceExpanded(!isReferenceExpanded)}
+                className="flex items-center space-x-2 flex-1 text-left hover:bg-blue-100 transition-colors rounded p-1 -m-1"
+                type="button"
+              >
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium text-blue-700">선택 영역 참조</span>
+                <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                  {reference.type}
+                </span>
+                {isReferenceExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-blue-500 ml-auto" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-blue-500 ml-auto" />
+                )}
+              </button>
+              <button
+                onClick={onClearReference}
+                className="text-blue-400 hover:text-blue-600 transition-colors ml-2"
+                type="button"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            {/* 확장 가능한 내용 영역 */}
+            {isReferenceExpanded && (
+              <div 
+                className="border-t border-blue-200 bg-white mx-2 mb-2 rounded transition-all duration-300"
+                style={{ maxHeight: '40vh' }}
+              >
+                <div className="p-3 max-h-full overflow-y-auto">
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {reference.text}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -173,58 +195,6 @@ export default function ChatInputWithButtons({
           )}
         </button>
       </div>
-      
-      {/* 참조 영역 모달 */}
-      {showReferenceModal && reference && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            {/* 모달 헤더 */}
-            <div className="flex items-center justify-between p-4 border-b">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900">선택 영역 참조</h3>
-                <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                  {reference.type}
-                </span>
-              </div>
-              <button
-                onClick={() => setShowReferenceModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            {/* 모달 내용 */}
-            <div className="p-4 max-h-[60vh] overflow-y-auto">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {reference.text}
-                </p>
-              </div>
-            </div>
-            
-            {/* 모달 푸터 */}
-            <div className="flex justify-end space-x-2 p-4 border-t bg-gray-50">
-              <button
-                onClick={() => setShowReferenceModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                닫기
-              </button>
-              <button
-                onClick={() => {
-                  onClearReference?.();
-                  setShowReferenceModal(false);
-                }}
-                className="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                참조 제거
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
