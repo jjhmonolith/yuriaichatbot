@@ -1,15 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { BookOpen, MessageCircle } from 'lucide-react';
+import { BookOpen, MessageCircle, MessageSquare } from 'lucide-react';
 
 interface PassageDrawerContentProps {
   passageData: any;
+  onQuestionWithText?: (selectedText: string) => void;
 }
 
-export default function PassageDrawerContent({ passageData }: PassageDrawerContentProps) {
+export default function PassageDrawerContent({ passageData, onQuestionWithText }: PassageDrawerContentProps) {
   const [activeTab, setActiveTab] = useState<'passage' | 'commentary'>('passage');
+  const [selectedText, setSelectedText] = useState('');
+  const [showQuestionButton, setShowQuestionButton] = useState(false);
+  const passageRef = useRef<HTMLDivElement>(null);
+
+  // 텍스트 선택 감지
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().trim().length > 0) {
+      const selected = selection.toString().trim();
+      setSelectedText(selected);
+      setShowQuestionButton(true);
+    } else {
+      setSelectedText('');
+      setShowQuestionButton(false);
+    }
+  };
+
+  // 선택된 텍스트로 질문하기
+  const handleQuestionWithSelection = () => {
+    if (selectedText && onQuestionWithText) {
+      onQuestionWithText(selectedText);
+      setSelectedText('');
+      setShowQuestionButton(false);
+      // 선택 해제
+      window.getSelection()?.removeAllRanges();
+    }
+  };
 
   if (!passageData) return null;
 
@@ -52,10 +80,35 @@ export default function PassageDrawerContent({ passageData }: PassageDrawerConte
         {activeTab === 'passage' ? (
           <div className="space-y-4">
             {/* 지문 내용 - 제목 제거하여 지문 영역 확보 */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+            <div className="bg-gray-50 p-4 rounded-lg relative">
+              <div 
+                ref={passageRef}
+                className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap select-text"
+                onMouseUp={handleTextSelection}
+                onTouchEnd={handleTextSelection}
+                style={{ userSelect: 'text' }}
+              >
                 {set?.passage || '지문 내용을 불러올 수 없습니다.'}
               </div>
+              
+              {/* 선택된 텍스트로 질문하기 버튼 */}
+              {showQuestionButton && (
+                <div className="absolute top-2 right-2 z-10">
+                  <button
+                    onClick={handleQuestionWithSelection}
+                    className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium
+                               shadow-lg hover:bg-blue-700 transition-colors animate-pop-in"
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    <span>선택한 부분 질문하기</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {/* 도움말 텍스트 */}
+            <div className="text-xs text-gray-500 px-2">
+              💡 지문의 특정 부분을 드래그로 선택하면 해당 부분에 대해 질문할 수 있습니다.
             </div>
           </div>
         ) : (

@@ -37,6 +37,16 @@ export default function ChatPage() {
     setDrawerType(null);
   };
 
+  // 선택된 텍스트로 질문하기
+  const handleQuestionWithText = (selectedText: string) => {
+    // 드로어 닫기
+    closeDrawer();
+    
+    // 선택된 텍스트를 인용 형태로 포맷팅하여 질문 전송
+    const formattedQuestion = `"${selectedText}"에 대해 질문: `;
+    sendMessage(formattedQuestion);
+  };
+
   // 메시지 추가 시 스크롤 하단으로
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -155,7 +165,10 @@ export default function ChatPage() {
         passageData={passageData}
       >
         {drawerType === 'passage' && (
-          <PassageDrawerContent passageData={passageData} />
+          <PassageDrawerContent 
+            passageData={passageData} 
+            onQuestionWithText={handleQuestionWithText}
+          />
         )}
         {drawerType === 'questions' && (
           <QuestionsDrawerContent questions={passageData?.questions || []} />
