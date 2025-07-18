@@ -168,6 +168,30 @@ body {
   background: #94a3b8;
 }
 
+/* 스크롤바 항상 표시 (내용이 넘칠 때만) */
+.scrollbar-always-visible {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+.scrollbar-always-visible::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-always-visible::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+.scrollbar-always-visible::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+  min-height: 20px;
+}
+.scrollbar-always-visible::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.scrollbar-always-visible::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
+
 /* 버튼 텍스트 선택 방지 */
 button {
   -webkit-user-select: none;
