@@ -20,6 +20,8 @@ export default function ChatPage() {
   // 드로어 상태 관리
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
+  const [initialMessage, setInitialMessage] = useState('');
+  
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
     setDrawerType('passage');
@@ -42,9 +44,15 @@ export default function ChatPage() {
     // 드로어 닫기
     closeDrawer();
     
-    // 선택된 텍스트를 인용 형태로 포맷팅하여 질문 전송
+    // 선택된 텍스트를 인용 형태로 포맷팅하여 입력창에 미리 채우기
     const formattedQuestion = `"${selectedText}"에 대해 질문: `;
-    sendMessage(formattedQuestion);
+    setInitialMessage(formattedQuestion);
+  };
+
+  // 메시지 전송 후 initialMessage 초기화
+  const handleSendMessage = (message: string) => {
+    sendMessage(message);
+    setInitialMessage(''); // 전송 후 initialMessage 초기화
   };
 
   // 메시지 추가 시 스크롤 하단으로
@@ -147,12 +155,13 @@ export default function ChatPage() {
         {/* Chat Input with Buttons */}
         <div className="flex-shrink-0">
           <ChatInputWithButtons
-            onSend={sendMessage}
+            onSend={handleSendMessage}
             onOpenPassage={openPassageDrawer}
             onOpenQuestions={openQuestionsDrawer}
             disabled={sendingMessage}
             placeholder="무엇이든 질문해보세요."
             questionsCount={passageData?.questions?.length || 0}
+            initialMessage={initialMessage}
           />
         </div>
       </div>

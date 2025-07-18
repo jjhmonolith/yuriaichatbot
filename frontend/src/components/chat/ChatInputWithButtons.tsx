@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, BookOpen, HelpCircle } from 'lucide-react';
 
 interface ChatInputWithButtonsProps {
@@ -10,6 +10,7 @@ interface ChatInputWithButtonsProps {
   disabled?: boolean;
   placeholder?: string;
   questionsCount?: number;
+  initialMessage?: string;
 }
 
 export default function ChatInputWithButtons({ 
@@ -18,10 +19,23 @@ export default function ChatInputWithButtons({
   onOpenQuestions,
   disabled = false, 
   placeholder = "궁금한 것을 질문해보세요...",
-  questionsCount = 0
+  questionsCount = 0,
+  initialMessage = ''
 }: ChatInputWithButtonsProps) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialMessage);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // initialMessage가 변경될 때 message state 업데이트
+  useEffect(() => {
+    if (initialMessage) {
+      setMessage(initialMessage);
+      // 텍스트영역 높이 자동 조절
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+        textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+      }
+    }
+  }, [initialMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
