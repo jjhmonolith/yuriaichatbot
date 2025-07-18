@@ -101,7 +101,7 @@ export default function BottomDrawer({
           {/* 제목 영역 */}
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900">
-              {type === 'passage' ? '지문' : '문제'}
+              {type === 'passage' ? (passageData?.set?.title || '지문') : '문제'}
             </h3>
           </div>
           

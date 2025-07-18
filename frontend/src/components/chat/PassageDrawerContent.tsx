@@ -51,14 +51,7 @@ export default function PassageDrawerContent({ passageData }: PassageDrawerConte
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'passage' ? (
           <div className="space-y-4">
-            {/* 지문 제목 */}
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                {set?.title || '지문'}
-              </h2>
-            </div>
-            
-            {/* 지문 내용 */}
+            {/* 지문 내용 - 제목 제거하여 지문 영역 확보 */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                 {set?.passage || '지문 내용을 불러올 수 없습니다.'}
@@ -67,14 +60,7 @@ export default function PassageDrawerContent({ passageData }: PassageDrawerConte
           </div>
         ) : (
           <div className="space-y-4">
-            {/* 해설 제목 */}
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-blue-900 mb-2">
-                지문 해설
-              </h2>
-            </div>
-            
-            {/* 해설 내용 */}
+            {/* 해설 내용 - 제목 제거하여 중복 방지 */}
             {set?.passageComment ? (
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="prose max-w-none
