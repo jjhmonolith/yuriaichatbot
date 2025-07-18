@@ -75,7 +75,7 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
 
         {/* 선택지 */}
         <div className="space-y-2">
-          <h4 className="font-medium text-gray-900">선택지</h4>
+          <h4 className="text-sm font-medium text-gray-900">선택지</h4>
           {currentQuestion.options.map((option: string, optionIndex: number) => (
             <div 
               key={optionIndex}
@@ -86,7 +86,7 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-gray-700">
+                <span className="text-sm text-gray-700">
                   {String.fromCharCode(9312 + optionIndex)} {option}
                 </span>
                 {option === currentQuestion.correctAnswer && (
@@ -102,11 +102,11 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
 
         {/* 정답 */}
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <h4 className="font-medium text-green-900 mb-2 flex items-center">
-            <CheckCircle className="w-5 h-5 mr-2" />
+          <h4 className="text-sm font-medium text-green-900 mb-2 flex items-center">
+            <CheckCircle className="w-4 h-4 mr-2" />
             정답
           </h4>
-          <p className="text-green-800 font-medium">
+          <p className="text-sm text-green-800 font-medium">
             {currentQuestion.correctAnswer}
           </p>
         </div>
@@ -118,11 +118,11 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
               onClick={() => setIsExplanationCollapsed(!isExplanationCollapsed)}
               className="w-full p-4 flex items-center justify-between text-left hover:bg-blue-100 transition-colors"
             >
-              <h4 className="font-medium text-blue-900">해설</h4>
+              <h4 className="text-sm font-medium text-blue-900">해설</h4>
               {isExplanationCollapsed ? (
-                <ChevronRight className="w-5 h-5 text-blue-600" />
+                <ChevronRight className="w-4 h-4 text-blue-600" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-blue-600" />
+                <ChevronDown className="w-4 h-4 text-blue-600" />
               )}
             </button>
             
