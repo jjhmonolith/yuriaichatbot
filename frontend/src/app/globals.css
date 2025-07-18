@@ -155,8 +155,7 @@ body {
 
 /* 모바일 브라우저 최적화 */
 html, body {
-  height: 100vh;
-  height: 100dvh; /* 동적 viewport 높이 사용 */
+  height: 100%;
   overflow-x: hidden;
   /* 모바일 브라우저 zoom 방지 */
   touch-action: manipulation;

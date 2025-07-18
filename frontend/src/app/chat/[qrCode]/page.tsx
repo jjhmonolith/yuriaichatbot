@@ -20,15 +20,6 @@ export default function ChatPage() {
   // 드로어 상태 관리
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
-  // 모바일 viewport 높이 관리
-  const [viewportHeight, setViewportHeight] = useState(() => {
-    // 초기값을 window.innerHeight로 설정하여 깜빡임 방지
-    if (typeof window !== 'undefined') {
-      return window.innerHeight;
-    }
-    return 0;
-  });
-  
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
     setDrawerType('passage');
@@ -46,33 +37,6 @@ export default function ChatPage() {
     setDrawerType(null);
   };
 
-  // 모바일 viewport 높이 관리
-  useEffect(() => {
-    const updateViewportHeight = () => {
-      if (typeof window !== 'undefined') {
-        // 실제 보이는 viewport 높이 계산
-        const vh = window.innerHeight;
-        setViewportHeight(vh);
-        
-        // CSS 변수로 설정하여 전체 앱에서 사용 가능
-        document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
-      }
-    };
-
-    updateViewportHeight();
-    
-    // 모바일에서 주소창 숨김/표시 등으로 인한 높이 변경 감지
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', updateViewportHeight);
-      window.addEventListener('orientationchange', updateViewportHeight);
-      
-      return () => {
-        window.removeEventListener('resize', updateViewportHeight);
-        window.removeEventListener('orientationchange', updateViewportHeight);
-      };
-    }
-  }, []);
-
   // 메시지 추가 시 스크롤 하단으로
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -83,13 +47,7 @@ export default function ChatPage() {
   // 로딩 상태
   if (loading) {
     return (
-      <div 
-        className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center"
-        style={{ 
-          minHeight: viewportHeight || '100vh',
-          height: viewportHeight || '100vh'
-        }}
-      >
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 text-blue-600 animate-spin mb-4" />
           <p className="text-gray-600">학습 자료를 불러오는 중...</p>
@@ -101,13 +59,7 @@ export default function ChatPage() {
   // 에러 상태
   if (error) {
     return (
-      <div 
-        className="bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center"
-        style={{ 
-          minHeight: viewportHeight || '100vh',
-          height: viewportHeight || '100vh'
-        }}
-      >
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
         <div className="text-center p-8">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">오류가 발생했습니다</h2>
@@ -128,13 +80,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div 
-      className="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative overflow-hidden"
-      style={{ 
-        minHeight: viewportHeight || '100vh',
-        height: viewportHeight || '100vh'
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative overflow-hidden">
       {/* 배경 장식 요소들 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-float"></div>
@@ -142,12 +88,7 @@ export default function ChatPage() {
         <div className="absolute bottom-32 left-20 w-24 h-24 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div 
-        className="max-w-4xl mx-auto flex flex-col relative z-10"
-        style={{ 
-          height: viewportHeight || '100vh'
-        }}
-      >
+      <div className="max-w-4xl mx-auto min-h-screen flex flex-col relative z-10">
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800 pb-2">
