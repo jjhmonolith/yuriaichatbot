@@ -42,8 +42,9 @@ export default function ChatPage() {
 
   // 선택된 텍스트로 질문하기
   const handleQuestionWithText = (selectedText: string, type: string = '지문') => {
-    // 드로어 닫기
-    closeDrawer();
+    // 드로어 즉시 닫기
+    setDrawerOpen(false);
+    setDrawerType(null);
     
     // 참조 영역 설정 (입력창에 직접 넣지 않고 별도 영역에 표시)
     setReference({
