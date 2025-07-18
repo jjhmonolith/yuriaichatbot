@@ -21,7 +21,13 @@ export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
   // 모바일 viewport 높이 관리
-  const [viewportHeight, setViewportHeight] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(() => {
+    // 초기값을 window.innerHeight로 설정하여 깜빡임 방지
+    if (typeof window !== 'undefined') {
+      return window.innerHeight;
+    }
+    return 0;
+  });
   
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
