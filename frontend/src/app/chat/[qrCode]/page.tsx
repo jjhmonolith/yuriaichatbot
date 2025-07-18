@@ -22,6 +22,7 @@ export default function ChatPage() {
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
   // 모바일 viewport 높이 관리
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
@@ -46,10 +47,18 @@ export default function ChatPage() {
       if (typeof window !== 'undefined') {
         // 실제 보이는 viewport 높이 계산
         const vh = window.innerHeight;
+        const initialVh = window.screen.height;
+        
+        // 키보드가 열린 상태인지 감지 (높이가 20% 이상 줄어들면 키보드가 열린 것으로 간주)
+        const heightDiff = initialVh - vh;
+        const isKeyboardVisible = heightDiff > initialVh * 0.2;
+        
         setViewportHeight(vh);
+        setIsKeyboardOpen(isKeyboardVisible);
         
         // CSS 변수로 설정하여 전체 앱에서 사용 가능
         document.documentElement.style.setProperty('--vh', `${vh * 0.01}px`);
+        document.documentElement.style.setProperty('--keyboard-height', `${heightDiff}px`);
       }
     };
 
@@ -147,7 +156,14 @@ export default function ChatPage() {
       >
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800">
+        <div 
+          className={`flex-1 overflow-y-auto p-4 space-y-4 perspective-800 ${
+            isKeyboardOpen ? 'pb-2' : ''
+          }`}
+          style={{ 
+            marginBottom: isKeyboardOpen ? '0' : '0'
+          }}
+        >
           {/* Welcome Message */}
           {session.messages.length === 0 && (
             <div className="text-center py-8 animate-pop-in">
@@ -191,14 +207,16 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Input with Buttons */}
-        <ChatInputWithButtons
-          onSend={sendMessage}
-          onOpenPassage={openPassageDrawer}
-          onOpenQuestions={openQuestionsDrawer}
-          disabled={sendingMessage}
-          placeholder="지문에 대해 궁금한 것을 질문해보세요..."
-          questionsCount={passageData?.questions?.length || 0}
-        />
+        <div className={isKeyboardOpen ? 'mobile-keyboard-fix' : ''}>
+          <ChatInputWithButtons
+            onSend={sendMessage}
+            onOpenPassage={openPassageDrawer}
+            onOpenQuestions={openQuestionsDrawer}
+            disabled={sendingMessage}
+            placeholder="지문에 대해 궁금한 것을 질문해보세요..."
+            questionsCount={passageData?.questions?.length || 0}
+          />
+        </div>
       </div>
       
       {/* Bottom Drawer */}

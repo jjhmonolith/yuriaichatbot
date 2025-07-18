@@ -163,6 +163,17 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 모바일 키보드 대응 */
+@supports (-webkit-touch-callout: none) {
+  .mobile-keyboard-fix {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+}
+
 /* 모바일 safe area 고려 */
 @supports (padding: max(0px)) {
   body {
