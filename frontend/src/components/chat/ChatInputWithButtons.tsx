@@ -1,16 +1,18 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, BookOpen, HelpCircle } from 'lucide-react';
+import { Send, Loader2, BookOpen, HelpCircle, X } from 'lucide-react';
 
 interface ChatInputWithButtonsProps {
-  onSend: (message: string) => void;
+  onSend: (message: string, reference?: { text: string; type: string }) => void;
   onOpenPassage: () => void;
   onOpenQuestions: () => void;
   disabled?: boolean;
   placeholder?: string;
   questionsCount?: number;
   initialMessage?: string;
+  reference?: { text: string; type: string } | null;
+  onClearReference?: () => void;
 }
 
 export default function ChatInputWithButtons({ 
@@ -20,7 +22,9 @@ export default function ChatInputWithButtons({
   disabled = false, 
   placeholder = "궁금한 것을 질문해보세요...",
   questionsCount = 0,
-  initialMessage = ''
+  initialMessage = '',
+  reference = null,
+  onClearReference
 }: ChatInputWithButtonsProps) {
   const [message, setMessage] = useState(initialMessage);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -42,7 +46,7 @@ export default function ChatInputWithButtons({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !disabled) {
-      onSend(message.trim());
+      onSend(message.trim(), reference || undefined);
       setMessage('');
       
       // 텍스트영역 높이 리셋
@@ -72,6 +76,31 @@ export default function ChatInputWithButtons({
 
   return (
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
+      {/* 참조 영역 배지 */}
+      {reference && (
+        <div className="px-4 pt-3 pb-2">
+          <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium text-blue-700">선택 영역 참조</span>
+              <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                {reference.type}
+              </span>
+            </div>
+            <button
+              onClick={onClearReference}
+              className="text-blue-400 hover:text-blue-600 transition-colors"
+              type="button"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded border">
+            {reference.text.length > 100 ? `${reference.text.substring(0, 100)}...` : reference.text}
+          </div>
+        </div>
+      )}
+      
       {/* 입력 영역 */}
       <form onSubmit={handleSubmit} className="flex items-center space-x-3 p-4">
         <div className="flex-1 relative">

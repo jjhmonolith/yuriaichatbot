@@ -21,6 +21,7 @@ export default function ChatPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
   const [initialMessage, setInitialMessage] = useState('');
+  const [reference, setReference] = useState<{ text: string; type: string } | null>(null);
   
   // 드로어 열기 함수들
   const openPassageDrawer = () => {
@@ -40,19 +41,33 @@ export default function ChatPage() {
   };
 
   // 선택된 텍스트로 질문하기
-  const handleQuestionWithText = (selectedText: string) => {
+  const handleQuestionWithText = (selectedText: string, type: string = '지문') => {
     // 드로어 닫기
     closeDrawer();
     
-    // 선택된 텍스트를 인용 형태로 포맷팅하여 입력창에 미리 채우기
-    const formattedQuestion = `"${selectedText}"에 대해 질문: `;
-    setInitialMessage(formattedQuestion);
+    // 참조 영역 설정 (입력창에 직접 넣지 않고 별도 영역에 표시)
+    setReference({
+      text: selectedText,
+      type: type
+    });
   };
 
   // 메시지 전송 후 initialMessage 초기화
-  const handleSendMessage = (message: string) => {
-    sendMessage(message);
+  const handleSendMessage = (message: string, messageReference?: { text: string; type: string }) => {
+    // 참조가 있으면 함께 전송
+    if (messageReference) {
+      const formattedMessage = `[참조: ${messageReference.type}] "${messageReference.text}"\n\n질문: ${message}`;
+      sendMessage(formattedMessage);
+      setReference(null); // 참조 초기화
+    } else {
+      sendMessage(message);
+    }
     setInitialMessage(''); // 전송 후 initialMessage 초기화
+  };
+
+  // 참조 영역 초기화
+  const handleClearReference = () => {
+    setReference(null);
   };
 
   // 메시지 추가 시 스크롤 하단으로
@@ -162,6 +177,8 @@ export default function ChatPage() {
             placeholder="무엇이든 질문해보세요."
             questionsCount={passageData?.questions?.length || 0}
             initialMessage={initialMessage}
+            reference={reference}
+            onClearReference={handleClearReference}
           />
         </div>
       </div>

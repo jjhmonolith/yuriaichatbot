@@ -6,7 +6,7 @@ import { BookOpen, MessageCircle, MessageSquare } from 'lucide-react';
 
 interface PassageDrawerContentProps {
   passageData: any;
-  onQuestionWithText?: (selectedText: string) => void;
+  onQuestionWithText?: (selectedText: string, type: string) => void;
 }
 
 export default function PassageDrawerContent({ passageData, onQuestionWithText }: PassageDrawerContentProps) {
@@ -34,7 +34,9 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
     e.stopPropagation();
     
     if (selectedText && onQuestionWithText) {
-      onQuestionWithText(selectedText);
+      // 현재 활성 탭에 따라 타입 결정
+      const referenceType = activeTab === 'passage' ? '지문' : '지문 해설';
+      onQuestionWithText(selectedText, referenceType);
       setSelectedText('');
       setShowQuestionButton(false);
       // 선택 해제
