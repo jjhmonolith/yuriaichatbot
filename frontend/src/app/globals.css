@@ -25,6 +25,120 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* 3D 효과 유틸리티 */
+@layer components {
+  .perspective-800 { 
+    perspective: 800px; 
+  }
+  
+  .transform-style-3d { 
+    transform-style: preserve-3d; 
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-morphism-dark {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+}
+
+/* 3D 회전 애니메이션 */
+@keyframes tilt {
+  0%, 100% { 
+    transform: rotateY(0deg) translateZ(0px); 
+  }
+  50% { 
+    transform: rotateY(-8deg) translateZ(6px); 
+  }
+}
+
+@keyframes tilt-reverse {
+  0%, 100% { 
+    transform: rotateY(0deg) translateZ(0px); 
+  }
+  50% { 
+    transform: rotateY(8deg) translateZ(6px); 
+  }
+}
+
+/* Pop-in 애니메이션 */
+@keyframes pop-in {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.8) translateY(4px); 
+  }
+  80% { 
+    opacity: 1; 
+    transform: scale(1.05) translateY(0); 
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1) translateY(0); 
+  }
+}
+
+/* 플로팅 애니메이션 */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-6px); 
+  }
+}
+
+/* 펄스 애니메이션 */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
+  }
+}
+
+/* 애니메이션 클래스 */
+.animate-tilt {
+  animation: tilt 0.6s ease-in-out;
+}
+
+.animate-tilt-reverse {
+  animation: tilt-reverse 0.6s ease-in-out;
+}
+
+.animate-pop-in {
+  animation: pop-in 0.4s cubic-bezier(0.22, 1.61, 0.36, 1) both;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* 접근성 고려 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-tilt,
+  .animate-tilt-reverse,
+  .animate-pop-in,
+  .animate-float,
+  .animate-pulse-glow {
+    animation: none;
+  }
+}
+
 /* 스크롤바 숨기기 유틸리티 */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */

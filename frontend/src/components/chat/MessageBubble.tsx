@@ -4,12 +4,14 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/storage';
 import { Bot, User } from 'lucide-react';
+import Avatar from './Avatar';
 
 interface MessageBubbleProps {
   message: ChatMessage;
+  index?: number;
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message, index = 0 }: MessageBubbleProps) {
   const isUser = message.type === 'user';
   const time = new Date(message.timestamp).toLocaleTimeString([], { 
     hour: '2-digit', 
@@ -17,28 +19,27 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   });
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div className={`flex max-w-xs lg:max-w-md ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2`}>
+    <div 
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 perspective-800`}
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className={`flex max-w-xs lg:max-w-md ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2 animate-pop-in`}>
         {/* Avatar */}
         <div className={`flex-shrink-0 ${isUser ? 'ml-2' : 'mr-2'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            isUser 
-              ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
-              : 'bg-gradient-to-r from-green-500 to-emerald-600'
-          }`}>
-            {isUser ? (
+          {isUser ? (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
               <User className="w-4 h-4 text-white" />
-            ) : (
-              <Bot className="w-4 h-4 text-white" />
-            )}
-          </div>
+            </div>
+          ) : (
+            <Avatar mood="happy" size="sm" />
+          )}
         </div>
 
         {/* Message */}
-        <div className={`relative px-4 py-2 rounded-2xl ${
+        <div className={`relative px-4 py-2 rounded-2xl transform-style-3d transition-all duration-300 ${
           isUser
-            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md'
-            : 'bg-white border border-gray-200 text-gray-900 rounded-bl-md shadow-sm'
+            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md shadow-lg hover:shadow-xl hover:animate-tilt-reverse'
+            : 'bg-white/90 backdrop-blur-sm border border-white/20 text-gray-900 rounded-bl-md shadow-lg hover:shadow-xl hover:animate-tilt'
         }`}>
           {isUser ? (
             <p className="text-sm whitespace-pre-wrap break-words">

@@ -8,6 +8,7 @@ import ChatInputWithButtons from '@/components/chat/ChatInputWithButtons';
 import BottomDrawer from '@/components/chat/BottomDrawer';
 import PassageDrawerContent from '@/components/chat/PassageDrawerContent';
 import QuestionsDrawerContent from '@/components/chat/QuestionsDrawerContent';
+import Avatar from '@/components/chat/Avatar';
 import { Loader2, AlertCircle, Bot } from 'lucide-react';
 
 export default function ChatPage() {
@@ -125,32 +126,39 @@ export default function ChatPage() {
 
   return (
     <div 
-      className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50"
+      className="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative overflow-hidden"
       style={{ 
         minHeight: viewportHeight || '100vh',
         height: viewportHeight || '100vh'
       }}
     >
+      {/* 배경 장식 요소들 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-float"></div>
+        <div className="absolute top-40 right-16 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-32 left-20 w-24 h-24 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
+      </div>
+
       <div 
-        className="max-w-4xl mx-auto flex flex-col"
+        className="max-w-4xl mx-auto flex flex-col relative z-10"
         style={{ 
           height: viewportHeight || '100vh'
         }}
       >
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800">
           {/* Welcome Message */}
           {session.messages.length === 0 && (
-            <div className="text-center py-8">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-4">
-                <Bot className="w-8 h-8 text-white" />
+            <div className="text-center py-8 animate-pop-in">
+              <div className="mx-auto mb-4">
+                <Avatar mood="happy" size="lg" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 안녕하세요! 👋
               </h3>
               <p className="text-gray-600 mb-4">
-                <span className="font-medium text-blue-600">{passageData.set.title}</span>에 대해 궁금한 것이 있으면 언제든 질문해주세요!
+                <span className="font-medium text-purple-600">{passageData.set.title}</span>에 대해 궁금한 것이 있으면 언제든 질문해주세요!
               </p>
               <div className="text-sm text-gray-500">
                 예: "이 지문의 주제가 무엇인가요?", "어려운 단어를 설명해주세요", "문제를 풀어주세요"
@@ -159,22 +167,20 @@ export default function ChatPage() {
           )}
 
           {/* Messages */}
-          {session.messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+          {session.messages.map((message, index) => (
+            <MessageBubble key={message.id} message={message} index={index} />
           ))}
 
           {/* Typing Indicator */}
           {sendingMessage && (
             <div className="flex justify-start mb-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-2 shadow-sm">
+                <Avatar mood="thinking" size="sm" />
+                <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl rounded-bl-md px-4 py-2 shadow-lg">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
