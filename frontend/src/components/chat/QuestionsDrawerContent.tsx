@@ -43,13 +43,13 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
   return (
     <div className="h-full flex flex-col">
       {/* 네비게이션 헤더 (칩 형태) */}
-      <div className="bg-gray-50 border-b border-gray-200 p-3">
+      <div className="bg-gray-50 border-b border-gray-200 p-2">
         <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide">
           {questions.map((question, index) => (
             <button
               key={question._id}
               onClick={() => goToQuestion(index)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full border-2 transition-all text-sm font-medium min-w-[80px] ${
+              className={`flex-shrink-0 px-3 py-1.5 rounded-full border-2 transition-all text-xs font-medium min-w-[70px] ${
                 index === currentQuestionIndex
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'

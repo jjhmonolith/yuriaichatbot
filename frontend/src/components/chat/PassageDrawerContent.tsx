@@ -54,25 +54,25 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
       <div className="flex bg-gray-50 border-b border-gray-200">
         <button
           onClick={() => setActiveTab('passage')}
-          className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 text-xs font-medium transition-colors ${
             activeTab === 'passage'
               ? 'bg-white text-blue-700 border-b-2 border-blue-500'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-3 h-3" />
           <span>지문</span>
         </button>
         <button
           onClick={() => setActiveTab('commentary')}
-          className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 text-sm font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 text-xs font-medium transition-colors ${
             activeTab === 'commentary'
               ? 'bg-white text-blue-700 border-b-2 border-blue-500'
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
           }`}
           disabled={!set?.passageComment}
         >
-          <MessageCircle className="w-4 h-4" />
+          <MessageCircle className="w-3 h-3" />
           <span>해설</span>
           {!set?.passageComment && (
             <span className="text-xs text-gray-400">(없음)</span>

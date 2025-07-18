@@ -142,7 +142,7 @@ export default function ChatInputWithButtons({
                 className="border-t border-blue-200 bg-white mx-2 mb-2 rounded transition-all duration-300 overflow-hidden"
                 style={{ maxHeight: '30vh' }}
               >
-                <div className="p-3 overflow-y-auto scrollbar-always-visible" style={{ maxHeight: '30vh' }}>
+                <div className="p-3 overflow-y-auto scrollbar-thin" style={{ maxHeight: '30vh' }}>
                   <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {reference.text}
                   </p>

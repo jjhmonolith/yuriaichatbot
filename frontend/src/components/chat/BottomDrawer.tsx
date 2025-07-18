@@ -102,10 +102,10 @@ export default function BottomDrawer({
         }}
       >
         {/* 헤더 영역 (닫기 버튼만) */}
-        <div className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 flex items-center justify-between px-4 py-3">
+        <div className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 flex items-center justify-between px-4 py-2">
           {/* 제목 영역 */}
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-sm font-semibold text-gray-900">
               {type === 'passage' ? (passageData?.set?.title || '지문') : '문제'}
             </h3>
           </div>
@@ -113,17 +113,17 @@ export default function BottomDrawer({
           {/* 닫기 버튼 */}
           <button
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             title="닫기"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* 컨텐츠 영역 */}
         <div 
           className="flex-1 overflow-hidden" 
-          style={{ height: `${currentHeight - 60}px` }}
+          style={{ height: `${currentHeight - 50}px` }}
         >
           {children}
         </div>

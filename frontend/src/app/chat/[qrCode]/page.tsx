@@ -125,7 +125,7 @@ export default function ChatPage() {
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col relative z-10">
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800 pb-2">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800 pb-1">
           {/* Welcome Message */}
           {session.messages.length === 0 && (
             <div className="text-center py-8 animate-pop-in">
