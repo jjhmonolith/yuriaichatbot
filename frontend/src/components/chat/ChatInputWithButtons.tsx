@@ -107,8 +107,8 @@ export default function ChatInputWithButtons({
     <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 참조 영역 배지 */}
       {reference && (
-        <div className="px-4 pt-3 pb-0">
-          <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden mb-3">
+        <div className="px-4 pt-3 pb-3">
+          <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
             <div className="flex items-center justify-between px-3 py-2">
               <button
@@ -154,7 +154,7 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className={`flex items-center space-x-3 px-4 ${!reference ? 'pt-3' : 'pt-0'}`}>
+      <form onSubmit={handleSubmit} className={`flex items-center space-x-3 px-4 ${!reference ? 'pt-3' : 'pt-0'} pb-3`}>
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -190,7 +190,7 @@ export default function ChatInputWithButtons({
       </form>
 
       {/* 지문/문제 버튼 (glassmorphism style) */}
-      <div className="px-4 pb-3 pt-3 flex space-x-3">
+      <div className="px-4 pb-3 flex space-x-3">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
