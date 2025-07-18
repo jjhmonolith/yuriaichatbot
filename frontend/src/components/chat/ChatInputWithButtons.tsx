@@ -104,10 +104,10 @@ export default function ChatInputWithButtons({
   };
 
   return (
-    <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
+    <div className="glass-morphism border-t border-white/20 backdrop-blur-md pt-3">
       {/* 참조 영역 배지 */}
       {reference && (
-        <div className="px-4 pt-3 pb-3">
+        <div className="px-4 pb-3">
           <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
             <div className="flex items-center justify-between px-3 py-2">
@@ -154,7 +154,7 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className={`flex items-center space-x-3 px-4 ${!reference ? 'pt-3' : 'pt-0'} pb-3`}>
+      <form onSubmit={handleSubmit} className="flex items-center space-x-3 px-4 pb-3">
         <div className="flex-1 relative">
           <textarea
             ref={textareaRef}
@@ -178,9 +178,8 @@ export default function ChatInputWithButtons({
           disabled={!message.trim() || disabled}
           className="flex-shrink-0 w-11 h-11 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl 
                      hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed 
-                     transition-all duration-300 flex items-center justify-center
+                     transition-all duration-300 flex items-center justify-center py-3
                      transform hover:scale-105 active:scale-95"
-          style={{ minHeight: '44px' }}
         >
           {disabled ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -191,7 +190,7 @@ export default function ChatInputWithButtons({
       </form>
 
       {/* 지문/문제 버튼 (glassmorphism style) */}
-      <div className="px-4 pb-3 pt-3 flex space-x-3">
+      <div className="px-4 pb-3 flex space-x-3">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
