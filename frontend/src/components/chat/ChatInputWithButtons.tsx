@@ -65,11 +65,11 @@ export default function ChatInputWithButtons({
             placeholder="무엇이든 질문해보세요."
             disabled={disabled}
             rows={1}
-            className="w-full resize-none rounded-xl border border-white/30 px-4 py-3 pr-12 
+            className="w-full resize-none rounded-xl border border-white/30 px-4 py-3 
                        bg-white/20 backdrop-blur-sm text-gray-900 placeholder-gray-600
                        focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 
-                       disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-300
-                       shadow-lg hover:shadow-xl text-sm placeholder:text-sm"
+                       disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-200
+                       shadow-lg text-sm placeholder:text-sm"
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
         </div>
