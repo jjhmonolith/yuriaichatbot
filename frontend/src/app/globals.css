@@ -163,12 +163,19 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 모바일 input zoom 방지 */
+/* 모바일 input zoom 방지 - 더 강력한 설정 */
 @media screen and (max-width: 768px) {
   input, textarea, select {
     font-size: 16px !important;
     -webkit-text-size-adjust: 100%;
     -webkit-appearance: none;
+    -webkit-user-select: text;
+    -webkit-touch-callout: none;
+  }
+  
+  /* 특정 textarea 클래스에도 적용 */
+  .w-full.resize-none {
+    font-size: 16px !important;
   }
 }
 
