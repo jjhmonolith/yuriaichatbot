@@ -98,10 +98,10 @@ export default function ChatInputWithInlineActions({
     <form
       ref={wrapRef}
       onSubmit={handleSubmit}
-      className="fixed bottom-0 inset-x-0 z-10 w-full px-4 pt-2 pb-[calc(env(safe-area-inset-bottom)+16px)] backdrop-blur-md"
+      className="fixed bottom-0 inset-x-0 z-10 w-full px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pointer-events-none"
     >
       {/* 입력 상자 컨테이너 */}
-      <div className="relative w-full">
+      <div className="relative w-full pointer-events-auto">
         {/* 실제 textarea + 인라인 칩 + send 버튼 */}
         <textarea
           ref={textareaRef}
@@ -112,53 +112,67 @@ export default function ChatInputWithInlineActions({
           disabled={disabled}
           rows={1}
           className="w-full resize-none rounded-2xl bg-[var(--cibg)] shadow-input
-                     border border-white/20 px-4 py-3 pr-12 pt-9
-                     focus:ring-2 focus:ring-purple-400/40 focus:border-purple-400
-                     transition disabled:opacity-50
-                     text-[16px] leading-[1.4] placeholder:text-[16px]
+                     border border-white/25 px-4 py-4 pr-14 text-[15px]
+                     focus:ring-2 focus:ring-purple-400/40 transition disabled:opacity-50
                      text-gray-900 placeholder-gray-600"
           style={{ 
-            minHeight: '44px', 
-            maxHeight: '160px',
-            lineHeight: '1.4',
-            fontSize: '16px'
+            minHeight: '56px', 
+            maxHeight: '180px',
+            paddingTop: '2.25rem',
+            paddingBottom: '3.75rem'
           }}
         />
 
-        {/* 인라인 액션 버튼 그룹 (좌측 상단) */}
-        <div className="absolute left-3 top-2 flex items-center gap-2 text-xs font-medium">
-          <button
-            type="button"
-            onClick={onOpenPassage}
-            disabled={disabled}
-            className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200
-                       flex items-center gap-1 transition-colors disabled:opacity-50"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            +지문
-          </button>
+        {/* 하단 액션 바 (+지문 / +문제 / ➤ 전송) */}
+        <div className="absolute -bottom-9 left-0 right-0 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {/* +지문 */}
+            <button 
+              type="button" 
+              onClick={onOpenPassage}
+              disabled={disabled}
+              className="flex items-center gap-1 bg-blue-100 text-blue-700
+                         h-7 px-2 rounded-md text-[13px] font-medium hover:bg-blue-200
+                         transition-colors disabled:opacity-50"
+            >
+              <BookOpen className="w-3.5 h-3.5" /> +지문
+            </button>
 
-          <button
-            type="button"
-            onClick={onOpenQuestions}
-            disabled={disabled}
-            className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-700 hover:bg-purple-200
-                       flex items-center gap-1 transition-colors disabled:opacity-50"
+            {/* +문제 */}
+            <button 
+              type="button" 
+              onClick={onOpenQuestions}
+              disabled={disabled}
+              className="flex items-center gap-1 bg-purple-100 text-purple-700
+                         h-7 px-2 rounded-md text-[13px] font-medium hover:bg-purple-200
+                         transition-colors disabled:opacity-50"
+            >
+              <HelpCircle className="w-3.5 h-3.5" /> +문제
+              {questionsCount > 0 && (
+                <span className="ml-0.5 text-[10px] bg-purple-300/60 rounded-full px-1">
+                  {questionsCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* 전송 */}
+          <button 
+            type="submit" 
+            disabled={!message.trim() || disabled}
+            className="w-11 h-11 rounded-full bg-gradient-to-r from-purple-500 to-pink-600
+                       flex items-center justify-center text-white
+                       hover:from-purple-600 hover:to-pink-700 active:scale-95
+                       disabled:opacity-40 transition-all duration-200"
           >
-            <HelpCircle className="w-3.5 h-3.5" />
-            +문제
-            {questionsCount > 0 && (
-              <span className="ml-0.5 text-[10px] rounded-full bg-purple-300/60 px-1">
-                {questionsCount}
-              </span>
-            )}
+            <SendHorizontal className="w-5 h-5" />
           </button>
         </div>
 
-        {/* 선택 영역 참조 칩 (동적으로) */}
+        {/* 선택 영역 참조 칩 (입력박스 위쪽) */}
         {reference && (
-          <div className="absolute left-[calc(3px+0.25rem)] bottom-2 flex items-center
-                          gap-1 bg-blue-50 text-blue-700 rounded-md px-2 py-0.5 text-xs
+          <div className="absolute -top-6 left-0 flex items-center gap-1
+                          bg-blue-50 text-blue-700 rounded-md px-2 py-0.5 text-xs
                           border border-blue-200">
             <span>참조 • {reference.type}</span>
             <button 
@@ -171,19 +185,6 @@ export default function ChatInputWithInlineActions({
           </div>
         )}
 
-        {/* 전송 버튼 (우측 하단) */}
-        <button
-          type="submit"
-          disabled={!message.trim() || disabled}
-          className="absolute right-2 bottom-2 w-9 h-9 rounded-full
-                     bg-gradient-to-r from-purple-500 to-pink-600 text-white
-                     flex items-center justify-center
-                     hover:from-purple-600 hover:to-pink-700 active:scale-95
-                     disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200
-                     transform hover:scale-105"
-        >
-          <SendHorizontal className="w-4 h-4" />
-        </button>
       </div>
     </form>
   );
