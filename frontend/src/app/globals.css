@@ -7,7 +7,7 @@
   /* 입력 카드 배경: 60% 투명 흰색 */
   --ci-bg: rgba(255, 255, 255, 0.6);
   /* 블러 강도: 12px (필요 시 8~16으로 조정) */
-  --ci-blur: 12px;
+  --ci-blur: 16px;
   /* 입력바·드로어 공통 토큰 */
   --glass-bg: rgba(255, 255, 255, 0.75); /* 75% 투명 흰색으로 강화 */
   --glass-blur: 16px;                     /* backdrop-blur 강도 증가 */
@@ -45,13 +45,13 @@ body {
   .shadow-input { 
     box-shadow: 0 4px 14px rgba(0,0,0,.08); 
   }
-  /* 단일 헬퍼 클래스 */
+  /* Blur 효과 100% 보장 방식 - Tailwind JIT 우회 */
   .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%) brightness(110%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%) brightness(110%);
-    border: 1px solid var(--glass-ring);
-    box-shadow: 0 8px 32px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,0.2) inset;
+    backdrop-filter: blur(var(--ci-blur, 14px)) saturate(180%) brightness(110%);
+    -webkit-backdrop-filter: blur(var(--ci-blur, 14px)) saturate(180%) brightness(110%);
+    background-color: rgba(255, 255, 255, 0.8); /* 투명도 80%로 강화 */
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
   }
 }
 
