@@ -166,7 +166,6 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
               WebkitTapHighlightColor: 'transparent',
               position: 'relative',
               zIndex: 10001,
-              isolation: 'isolate',
               backgroundColor: '#2563eb',
               borderColor: '#3b82f6'
             }}

@@ -34,13 +34,17 @@ body {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
   }
-  /* 확실한 블러 효과 - 고정값 사용으로 100% 보장 */
+  /* 확실한 블러 효과 - WebKit 버그 방지 최종 패치 */
   .glass {
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(16px) saturate(150%);
     -webkit-backdrop-filter: blur(16px) saturate(150%);
-    background: var(--glass-bg);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    /* 안전장치: WebKit backdrop-filter 버그 방지 */
+    transform: none !important;
+    isolation: auto !important;
+    contain: none !important;
   }
 }
 
