@@ -169,11 +169,18 @@ export default function ChatInputWithButtons({
           placeholder="무엇이든 질문해보세요."
           disabled={disabled}
           rows={1}
-          className="flex-1 min-h-[48px] max-h-[128px] leading-tight rounded-xl bg-white/20 backdrop-blur-sm px-4 py-3
+          className="flex-1 min-h-[48px] max-h-[128px] rounded-xl bg-white/20 backdrop-blur-sm px-4 py-3
                      border border-white/30 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 
                      disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-200
-                     text-base placeholder:text-base chat-input-mobile text-gray-900 placeholder-gray-600"
-          style={{ minHeight: '48px', maxHeight: '128px' }}
+                     text-gray-900 placeholder-gray-600 resize-none
+                     text-[16px] leading-[1.4] placeholder:text-[16px]
+                     flex items-center"
+          style={{ 
+            minHeight: '48px', 
+            maxHeight: '128px',
+            lineHeight: '1.4',
+            fontSize: '16px'
+          }}
         />
         
         <button
