@@ -4,7 +4,8 @@
   --background: #ffffff;
   --foreground: #171717;
   --cih: 72px; /* Chat Input Height - fallback */
-  --ci-bg: rgba(255,255,255,0.3); /* Chat Input Background */
+  --cibg: rgba(255,255,255,0.8); /* Chat Input Background - light */
+  --cibg-dark: rgba(48,48,48,0.5); /* Chat Input Background - dark */
 }
 
 @theme inline {
@@ -18,7 +19,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --ci-bg: rgba(24,24,24,0.4); /* Dark mode input background */
+    --cibg: var(--cibg-dark); /* Dark mode input background */
   }
 }
 
@@ -32,6 +33,9 @@ body {
 @layer utilities {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
+  }
+  .shadow-input { 
+    @apply shadow-[0_0_12px_rgba(0,0,0,0.08)]; 
   }
 }
 

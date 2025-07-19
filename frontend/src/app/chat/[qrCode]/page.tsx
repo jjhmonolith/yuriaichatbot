@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useChat } from '@/hooks/useChat';
 import MessageBubble from '@/components/chat/MessageBubble';
-import ChatInputWithButtons from '@/components/chat/ChatInputWithButtons';
+import ChatInputWithInlineActions from '@/components/chat/ChatInputWithInlineActions';
 import BottomDrawer from '@/components/chat/BottomDrawer';
 import PassageDrawerContent from '@/components/chat/PassageDrawerContent';
 import QuestionsDrawerContent from '@/components/chat/QuestionsDrawerContent';
@@ -174,20 +174,18 @@ export default function ChatPage() {
           />
         </div>
 
-        {/* Fixed Chat Input */}
-        <div className="max-w-4xl mx-auto w-full">
-          <ChatInputWithButtons
-            onSend={handleSendMessage}
-            onOpenPassage={openPassageDrawer}
-            onOpenQuestions={openQuestionsDrawer}
-            disabled={sendingMessage}
-            placeholder="무엇이든 질문해보세요."
-            questionsCount={passageData?.questions?.length || 0}
-            initialMessage={initialMessage}
-            reference={reference}
-            onClearReference={handleClearReference}
-          />
-        </div>
+        {/* Fixed Chat Input with Inline Actions */}
+        <ChatInputWithInlineActions
+          onSend={handleSendMessage}
+          onOpenPassage={openPassageDrawer}
+          onOpenQuestions={openQuestionsDrawer}
+          disabled={sendingMessage}
+          placeholder="무엇이든 질문해보세요."
+          questionsCount={passageData?.questions?.length || 0}
+          initialMessage={initialMessage}
+          reference={reference}
+          onClearReference={handleClearReference}
+        />
       
       {/* Bottom Drawer */}
       <BottomDrawer
