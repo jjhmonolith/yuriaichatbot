@@ -95,14 +95,15 @@ export default function BottomDrawer({
       {/* 드로어 */}
       <div
         ref={drawerRef}
-        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl shadow-xl z-50 transform transition-all duration-300 ease-out"
+        className="fixed bottom-0 left-0 right-0 glass rounded-t-2xl
+                   backdrop-saturate-150 z-50 transform transition-all duration-300 ease-out"
         style={{ 
           height: `${currentHeight}px`,
           transform: (isOpen && !isClosing) ? 'translateY(0)' : 'translateY(100%)'
         }}
       >
         {/* 헤더 영역 (닫기 버튼만) */}
-        <div className="relative bg-gray-50 rounded-t-xl border-b border-gray-200 flex items-center justify-between px-4 py-2">
+        <div className="relative bg-transparent rounded-t-2xl border-b border-white/20 flex items-center justify-between px-4 py-2">
           {/* 제목 영역 */}
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-gray-900">

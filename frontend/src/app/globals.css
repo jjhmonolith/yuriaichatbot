@@ -8,6 +8,10 @@
   --ci-bg: rgba(255, 255, 255, 0.6);
   /* 블러 강도: 12px (필요 시 8~16으로 조정) */
   --ci-blur: 12px;
+  /* 입력바·드로어 공통 토큰 */
+  --glass-bg: rgba(255, 255, 255, 0.60); /* 60% 투명 흰색 */
+  --glass-blur: 12px;                     /* backdrop-blur 강도 */
+  --glass-ring: rgba(255, 255, 255, 0.20); /* 테두리 컬러 */
 }
 
 @theme inline {
@@ -22,6 +26,7 @@
     --background: #0a0a0a;
     --foreground: #ededed;
     --ci-bg: rgba(28, 28, 28, 0.5); /* Dark mode input background */
+    --glass-bg: rgba(28, 28, 28, 0.5); /* Dark mode glass background */
   }
 }
 
@@ -39,6 +44,14 @@ body {
   /* 입력 카드용 그림자 */
   .shadow-input { 
     box-shadow: 0 4px 14px rgba(0,0,0,.08); 
+  }
+  /* 단일 헬퍼 클래스 */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-ring);
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
   }
 }
 

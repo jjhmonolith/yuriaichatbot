@@ -98,14 +98,14 @@ export default function ChatInputWithInlineActions({
     <form
       ref={wrapRef}
       onSubmit={handleSubmit}
-      className="fixed bottom-0 inset-x-0 z-10 w-full px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pointer-events-none"
+      className="fixed bottom-0 inset-x-0 z-10 w-full pb-[calc(env(safe-area-inset-bottom)+16px)]
+                 bg-transparent pointer-events-none"
     >
       {/* 입력 상자 컨테이너 - Grid 3-Row 레이아웃 */}
       <div
         className="grid grid-rows-[auto_1fr_auto] w-full gap-1 pointer-events-auto
-                   rounded-2xl bg-[var(--ci-bg)] backdrop-blur-[var(--ci-blur)]
-                   shadow-input border border-white/20
-                   px-4 pt-3 pb-3 transition-colors"
+                   glass rounded-none
+                   px-5 pt-3 pb-4 transition-colors"
       >
         {/* Textarea - Row 2 */}
         <textarea
