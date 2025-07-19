@@ -110,13 +110,13 @@ export default function ChatInputWithButtons({
   const SECB = 'pb-4';      // 행 사이 간격 16px
 
   return (
-    <div className="glass-morphism border-t border-white/20 backdrop-blur-md">
+    <div className="pt-4 glass-morphism border-t border-white/20 backdrop-blur-md">
       {/* 참조 영역 배지 */}
       {reference && (
         <div className={`flex flex-col ${SIDE} ${SECB}`}>
           <div ref={referenceBlockRef} className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
             {/* 헤더 (항상 표시) */}
-            <div className={`flex items-center ${GAP} ${PADY}`}>
+            <div className="flex items-center gap-2.5 py-2 px-3">
               <button
                 onClick={handleReferenceToggle}
                 className="flex items-center gap-2 flex-1 text-left hover:bg-blue-100 transition-colors rounded p-1 -m-1"
@@ -128,17 +128,17 @@ export default function ChatInputWithButtons({
                   {reference.type}
                 </span>
                 {isReferenceExpanded ? (
-                  <ChevronUp className="w-5 h-5 text-blue-500 ml-auto" />
+                  <ChevronUp className="w-4 h-4 text-blue-500 ml-auto" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-blue-500 ml-auto" />
+                  <ChevronDown className="w-4 h-4 text-blue-500 ml-auto" />
                 )}
               </button>
               <button
                 onClick={onClearReference}
-                className="text-blue-400 hover:text-blue-600 transition-colors"
+                className="shrink-0 ml-2 text-blue-400 hover:text-blue-600 transition-colors"
                 type="button"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
             
@@ -160,66 +160,62 @@ export default function ChatInputWithButtons({
       )}
       
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className={`flex items-center ${GAP} ${SIDE} ${SECB}`}>
-        <div className="flex-1 relative">
-          <textarea
-            ref={textareaRef}
-            value={message}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder="무엇이든 질문해보세요."
-            disabled={disabled}
-            rows={1}
-            className="w-full resize-none rounded-xl border border-white/30 px-4 py-3 
-                       bg-white/20 backdrop-blur-sm text-gray-900 placeholder-gray-600
-                       focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 
-                       disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-200
-                       text-base placeholder:text-base chat-input-mobile leading-snug"
-            style={{ minHeight: '48px', maxHeight: '128px' }}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex items-end gap-4 px-4 pb-4">
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder="무엇이든 질문해보세요."
+          disabled={disabled}
+          rows={1}
+          className="flex-1 min-h-[48px] max-h-[128px] leading-tight rounded-xl bg-white/20 backdrop-blur-sm px-4 py-3
+                     border border-white/30 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 
+                     disabled:bg-white/10 disabled:cursor-not-allowed transition-all duration-200
+                     text-base placeholder:text-base chat-input-mobile text-gray-900 placeholder-gray-600"
+          style={{ minHeight: '48px', maxHeight: '128px' }}
+        />
         
         <button
           type="submit"
           disabled={!message.trim() || disabled}
-          className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl 
-                     hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed 
-                     transition-all duration-300 flex items-center justify-center
+          className="w-12 h-12 p-0.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center
+                     hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300
                      transform hover:scale-105 active:scale-95"
         >
           {disabled ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
           )}
         </button>
       </form>
 
       {/* 지문/문제 버튼 */}
-      <div className={`flex justify-between ${GAP} ${SIDE} ${SECB}`}>
+      <div className="flex gap-4 px-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
         <button
           onClick={onOpenPassage}
           disabled={disabled}
-          className="flex-1 flex items-center justify-center gap-2 h-12 px-3
+          className="flex-1 h-12 flex items-center justify-center gap-1.5
                      bg-blue-400/20 text-blue-700 rounded-lg hover:bg-blue-400/30 
                      transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
                      border border-blue-400/30 backdrop-blur-sm
                      transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          <BookOpen className="w-5 h-5" />
+          <BookOpen className="w-4 h-4" />
           <span className="font-medium text-sm">지문</span>
         </button>
         
         <button
           onClick={onOpenQuestions}
           disabled={disabled}
-          className="flex-1 flex items-center justify-center gap-2 h-12 px-3
+          className="flex-1 h-12 flex items-center justify-center gap-1.5
                      bg-purple-400/20 text-purple-700 rounded-lg hover:bg-purple-400/30 
                      transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed 
                      border border-purple-400/30 backdrop-blur-sm
                      transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          <HelpCircle className="w-5 h-5" />
+          <HelpCircle className="w-4 h-4" />
           <span className="font-medium text-sm">문제</span>
           {questionsCount > 0 && (
             <span className="text-xs bg-purple-500/30 text-purple-800 px-1.5 py-0.5 rounded-full ml-1 
@@ -229,9 +225,6 @@ export default function ChatInputWithButtons({
           )}
         </button>
       </div>
-
-      {/* 모바일 안전 영역 */}
-      <div className="pb-[env(safe-area-inset-bottom)]" />
     </div>
   );
 }
