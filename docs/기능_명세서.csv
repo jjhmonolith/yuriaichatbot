@@ -130,3 +130,20 @@ UI/UX,채팅 인터페이스,SSR 호환성,window 객체 안전 접근으로 서
 UI/UX,채팅 인터페이스,상태 기반 높이 조절,화면 크기에 따른 동적 높이 조절,학생,완료,보통,N/A,반응형 적응
 UI/UX,채팅 인터페이스,드로어 컴포넌트 아키텍처,재사용 가능한 드로어 컴포넌트 구조,시스템,완료,높음,N/A,BottomDrawer.tsx
 UI/UX,채팅 인터페이스,채팅 입력 통합,지문/문제 버튼과 채팅 입력 통합 컴포넌트,학생,완료,높음,N/A,ChatInputWithButtons.tsx
+UI/UX,Glassmorphism UI,브라우저 엔진 자동 감지,CSS @supports로 WebKit/Blink 엔진 자동 분기,학생,완료,높음,N/A,globals.css .glass 클래스
+UI/UX,Glassmorphism UI,WebKit 계열 glassmorphism,iOS Safari/Chrome에서 18px blur + 80% 투명도,학생,완료,높음,N/A,진짜 glassmorphism 효과
+UI/UX,Glassmorphism UI,Blink/Gecko 폴백,Android Chrome/Desktop에서 95% opacity 불투명 카드,학생,완료,높음,N/A,완전 가독성 보장
+UI/UX,Glassmorphism UI,다크모드 지원,다크 테마에서 자동 색상 조정,학생,완료,보통,N/A,prefers-color-scheme 미디어 쿼리
+UI/UX,Glassmorphism UI,GPU 가속 최적화,will-change transform으로 하드웨어 가속,학생,완료,보통,N/A,성능 최적화
+UI/UX,Glassmorphism UI,WebKit 버그 방지,isolation/transform 충돌 문제 해결,시스템,완료,높음,N/A,안정성 향상
+UI/UX,Glassmorphism UI,단일 클래스 시스템,.glass 하나로 통일된 디자인 시스템,시스템,완료,높음,N/A,유지보수성 향상
+UI/UX,Glassmorphism UI,Tailwind JIT 우회,직접 CSS 정의로 purge 문제 해결,시스템,완료,높음,N/A,빌드 안정성
+UI/UX,Glassmorphism UI,채팅 입력창 적용,채팅 입력 컴포넌트에 glassmorphism 적용,학생,완료,높음,N/A,ChatInputWithInlineActions.tsx
+UI/UX,Glassmorphism UI,드로어 시스템 적용,하단 드로어에 glassmorphism 적용,학생,완료,높음,N/A,BottomDrawer.tsx
+UI/UX,Glassmorphism UI,메시지 버블 적용,AI 메시지 버블에 glassmorphism 적용,학생,완료,높음,N/A,MessageBubble.tsx
+UI/UX,Glassmorphism UI,타이핑 인디케이터 적용,AI 응답 중 타이핑 표시에 glassmorphism 적용,학생,완료,보통,N/A,page.tsx
+UI/UX,선택 텍스트 질문,지문 텍스트 선택,지문에서 드래그로 텍스트 선택 기능,학생,완료,높음,N/A,PassageDrawerContent.tsx
+UI/UX,선택 텍스트 질문,플로팅 질문 버튼,선택된 텍스트로 질문하기 플로팅 버튼 표시,학생,완료,높음,N/A,자동 팝업 버튼
+UI/UX,선택 텍스트 질문,참조 영역 표시,선택한 텍스트를 채팅 입력창에 참조 영역으로 표시,학생,완료,높음,N/A,컨텍스트 질문 지원
+UI/UX,선택 텍스트 질문,참조 타입 구분,지문/해설 구분하여 참조 타입 표시,학생,완료,보통,N/A,명확한 컨텍스트
+UI/UX,선택 텍스트 질문,터치 최적화,모바일 터치 환경에서 텍스트 선택 최적화,학생,완료,높음,N/A,모바일 UX 개선

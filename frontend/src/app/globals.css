@@ -193,6 +193,31 @@ body {
   background: #94a3b8;
 }
 
+/* 안정적인 스크롤바 공간 확보 */
+.scrollbar-stable {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.scrollbar-stable::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-stable::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-stable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scrollbar-stable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
 
 /* 버튼 텍스트 선택 방지 */
 button {

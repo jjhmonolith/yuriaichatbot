@@ -2,7 +2,8 @@
 
 > **목적**: 프론트엔드 UI 컴포넌트 구조와 기능을 명확히 정의하여 추후 UI 변경 시 오류를 방지  
 > **작성일**: 2025-07-18  
-> **버전**: 1.0
+> **최종 수정일**: 2025-01-19  
+> **버전**: 2.0
 
 ## 📋 목차
 
@@ -12,8 +13,9 @@
 4. [하단 드로어 시스템](#4-하단-드로어-시스템)
 5. [지문 드로어 컨텐츠](#5-지문-드로어-컨텐츠)
 6. [문제 드로어 컨텐츠](#6-문제-드로어-컨텐츠)
-7. [상태 관리 및 인터랙션](#7-상태-관리-및-인터랙션)
-8. [반응형 디자인 가이드](#8-반응형-디자인-가이드)
+7. [Glassmorphism UI 시스템](#7-glassmorphism-ui-시스템)
+8. [상태 관리 및 인터랙션](#8-상태-관리-및-인터랙션)
+9. [반응형 디자인 가이드](#9-반응형-디자인-가이드)
 
 ---
 
@@ -296,17 +298,83 @@
 
 ---
 
-## 7. 상태 관리 및 인터랙션
+## 7. Glassmorphism UI 시스템
 
-### 7.1 전역 상태
+### 7.1 시스템 개요
+현재 애플리케이션은 차세대 Glassmorphism UI 시스템을 사용하여 브라우저별 최적화와 완벽한 호환성을 제공합니다.
+
+### 7.2 기술적 구현
+- **파일**: `frontend/src/app/globals.css`
+- **CSS 클래스**: `.glass`
+- **브라우저 엔진 감지**: CSS `@supports` 쿼리 사용
+
+### 7.3 브라우저별 자동 분기
+```css
+/* WebKit 계열 (iOS Safari/Chrome) - 진짜 glassmorphism */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.80);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Blink/Gecko - 불투명 카드 폴백 */
+@supports not (-webkit-backdrop-filter: blur(1px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+}
+```
+
+### 7.4 적용 컴포넌트
+| 컴포넌트 | 파일 | 적용 위치 |
+|---------|------|----------|
+| ChatInputWithInlineActions | `ChatInputWithInlineActions.tsx` | 채팅 입력창 |
+| BottomDrawer | `BottomDrawer.tsx` | 하단 드로어 |
+| MessageBubble | `MessageBubble.tsx` | AI 메시지 버블 |
+| PassageDrawerContent | `PassageDrawerContent.tsx` | 지문/해설 컨테이너 |
+| Typing Indicator | `page.tsx` | 타이핑 인디케이터 |
+
+### 7.5 호환성 매트릭스
+| 브라우저/플랫폼 | 효과 | 가독성 |
+|----------------|------|--------|
+| iOS Safari | 18px blur + 80% 투명도 | ✅ 완벽 |
+| iOS Chrome | 18px blur + 80% 투명도 | ✅ 완벽 |
+| Android Chrome | 95% opacity 불투명 | ✅ 완벽 |
+| Desktop Chrome | 95% opacity 불투명 | ✅ 완벽 |
+| Desktop Safari | 18px blur + 80% 투명도 | ✅ 완벽 |
+| Firefox | 95% opacity 불투명 | ✅ 완벽 |
+
+### 7.6 성능 최적화
+- **GPU 가속**: `will-change: transform` 속성으로 하드웨어 가속
+- **WebKit 버그 방지**: `isolation`, `transform` 충돌 문제 해결
+- **메모리 효율성**: 단일 CSS 클래스로 일관된 디자인 시스템
+
+### 7.7 문제 해결 히스토리
+1. **Tailwind JIT Purge 문제**: `backdrop-blur-[var(--ci-blur)]` → 직접 CSS 속성으로 해결
+2. **WebKit isolation 버그**: `isolation: 'isolate'` 제거로 해결
+3. **Chrome 데스크톱 블러 약함**: 투명도 85% → 95%로 조정
+4. **브라우저 엔진 호환성**: `@supports` 쿼리로 자동 분기 시스템 구현
+
+---
+
+## 8. 상태 관리 및 인터랙션
+
+### 8.1 전역 상태
 ```typescript
 // ChatPage 컴포넌트 상태
 const [drawerOpen, setDrawerOpen] = useState(false);
 const [drawerType, setDrawerType] = useState<'passage' | 'questions' | null>(null);
-const [viewportHeight, setViewportHeight] = useState(0);
+const [initialMessage, setInitialMessage] = useState('');
+const [reference, setReference] = useState<{ text: string; type: string } | null>(null);
 ```
 
-### 7.2 드로어 상태 플로우
+### 8.2 드로어 상태 플로우
 ```
 초기상태: drawerOpen=false, drawerType=null
     ↓
@@ -321,12 +389,26 @@ BottomDrawer 열림 + PassageDrawerContent 표시
 setDrawerOpen(false) → setDrawerType(null)
 ```
 
-### 7.3 모바일 뷰포트 관리
-- **동적 높이 계산**: `window.innerHeight` 사용
-- **CSS 변수 설정**: `--vh` 커스텀 속성
-- **이벤트 리스너**: resize, orientationchange, scroll
+### 8.3 선택된 텍스트 질문 기능
+```typescript
+// 선택된 텍스트로 질문하기 플로우
+[텍스트 선택] → [플로팅 버튼 표시]
+    ↓
+[선택한 부분 질문하기 버튼 클릭]
+    ↓
+handleQuestionWithText() 호출
+    ↓
+드로어 닫기 + 참조 설정
+    ↓
+입력창에 참조 영역 표시
+```
 
-### 7.4 메시지 전송 플로우
+### 8.4 모바일 뷰포트 관리
+- **동적 높이 계산**: `window.innerHeight` 사용
+- **드로어 크기**: 화면 높이의 85%로 고정
+- **SSR 호환성**: `typeof window !== 'undefined'` 체크
+
+### 8.5 메시지 전송 플로우
 ```
 [메시지 입력] → [전송 버튼 클릭/Enter]
     ↓
@@ -343,20 +425,20 @@ sendingMessage = false
 
 ---
 
-## 8. 반응형 디자인 가이드
+## 9. 반응형 디자인 가이드
 
-### 8.1 브레이크포인트
+### 9.1 브레이크포인트
 - **모바일**: `< 768px`
 - **태블릿**: `768px - 1024px`
 - **데스크톱**: `> 1024px`
 
-### 8.2 모바일 최적화
+### 9.2 모바일 최적화
 - **터치 타겟**: 최소 48px 높이
 - **드래그 인터랙션**: 터치 이벤트 지원
 - **뷰포트 높이**: 동적 계산으로 모바일 브라우저 대응
 - **스크롤 방지**: 드로어 열림 시 배경 스크롤 비활성화
 
-### 8.3 접근성 고려사항
+### 9.3 접근성 고려사항
 - **키보드 네비게이션**: 모든 버튼 Tab 키로 접근 가능
 - **스크린 리더**: 적절한 aria-label 제공
 - **색상 대비**: WCAG 가이드라인 준수
@@ -364,26 +446,26 @@ sendingMessage = false
 
 ---
 
-## 9. 개발 시 주의사항
+## 10. 개발 시 주의사항
 
-### 9.1 상태 동기화
+### 10.1 상태 동기화
 - **드로어 타입 리셋**: 드로어 닫을 때 반드시 `setDrawerType(null)` 호출
 - **스크롤 복원**: 드로어 닫을 때 `body.overflow` 복원
 - **메모리 누수**: 이벤트 리스너 정리 필수
 
-### 9.2 성능 최적화
+### 10.2 성능 최적화
 - **자동 스크롤**: `smooth` 옵션으로 부드러운 스크롤
 - **리렌더링 최소화**: 불필요한 상태 업데이트 방지
 - **이벤트 쓰로틀링**: 리사이즈 이벤트 최적화
 
-### 9.3 에러 처리
+### 10.3 에러 처리
 - **네트워크 에러**: 적절한 에러 메시지 표시
 - **데이터 없음**: 빈 상태 UI 제공
 - **권한 에러**: 사용자 친화적 메시지
 
 ---
 
-## 10. 컴포넌트 의존성 다이어그램
+## 11. 컴포넌트 의존성 다이어그램
 
 ```
 ChatPage
@@ -398,21 +480,21 @@ ChatPage
 
 ---
 
-## 11. 추후 UI 변경 시 체크리스트
+## 12. 추후 UI 변경 시 체크리스트
 
-### 11.1 스타일 변경 시
+### 12.1 스타일 변경 시
 - [ ] 모든 상태에서 UI 테스트 (Loading, Error, Welcome, Chat)
 - [ ] 드로어 열림/닫힘 애니메이션 확인
 - [ ] 모바일 터치 인터랙션 테스트
 - [ ] 키보드 네비게이션 테스트
 
-### 11.2 기능 추가 시
+### 12.2 기능 추가 시
 - [ ] 상태 관리 로직 검토
 - [ ] 메모리 누수 방지 확인
 - [ ] 에러 처리 구현
 - [ ] 접근성 고려사항 반영
 
-### 11.3 성능 최적화 시
+### 12.3 성능 최적화 시
 - [ ] 불필요한 리렌더링 최소화
 - [ ] 이벤트 리스너 정리
 - [ ] 번들 크기 최적화
@@ -420,6 +502,30 @@ ChatPage
 
 ---
 
-*문서 버전: 1.0*  
-*최종 업데이트: 2025-07-18*  
+*문서 버전: 2.0*  
+*최종 업데이트: 2025-01-19*  
 *작성자: AI Assistant*
+
+---
+
+## 13. 최신 개선사항 (v2.0)
+
+### 13.1 Glassmorphism UI 시스템
+- 브라우저 엔진별 자동 분기 시스템 구현
+- WebKit 환경에서 진짜 glassmorphism, Blink/Gecko에서 불투명 카드 폴백
+- 100% 가독성 보장 및 성능 최적화
+
+### 13.2 선택된 텍스트 질문 기능
+- 지문/해설에서 텍스트 드래그 선택 기능
+- 플로팅 질문하기 버튼 자동 표시
+- 참조 영역을 통한 컨텍스트 질문 시스템
+
+### 13.3 하단 드로어 시스템 개선
+- 3단계 크기 조절 → 2단계로 단순화 (closed/standard)
+- 화면 높이의 85%로 고정하여 사용성 개선
+- SSR 호환성 및 모바일 최적화
+
+### 13.4 UI/UX 향상
+- perspective-800 클래스 제거로 WebKit 호환성 개선
+- 입력창 파일명 변경: ChatInputWithButtons → ChatInputWithInlineActions
+- 타이핑 인디케이터에 glassmorphism 적용

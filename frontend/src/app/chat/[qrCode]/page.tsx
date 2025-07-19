@@ -126,7 +126,7 @@ export default function ChatPage() {
       {/* Chat Messages Window */}
       <div 
         ref={listRef}
-        className="flex flex-col overflow-y-auto overscroll-contain h-full pb-safe max-w-4xl mx-auto w-full p-4 space-y-4"
+        className="flex flex-col overflow-y-auto overscroll-contain h-full pb-safe max-w-4xl mx-auto w-full p-4 pr-2 lg:pr-4 space-y-4 scrollbar-stable"
       >
           {/* Welcome Message */}
           {session.messages.length === 0 && (

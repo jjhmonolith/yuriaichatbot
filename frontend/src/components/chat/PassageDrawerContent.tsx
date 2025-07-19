@@ -81,7 +81,7 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
       </div>
 
       {/* 컨텐츠 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 pr-2 scrollbar-stable">
         {activeTab === 'passage' ? (
           <div className="space-y-4">
             {/* 지문 내용 - 제목 제거하여 지문 영역 확보 */}

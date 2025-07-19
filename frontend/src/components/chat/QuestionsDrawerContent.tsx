@@ -62,7 +62,7 @@ export default function QuestionsDrawerContent({ questions }: QuestionsDrawerCon
       </div>
 
       {/* 문제 내용 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 pr-2 space-y-6 scrollbar-stable">
         {/* 문제 */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">
