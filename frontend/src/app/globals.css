@@ -5,7 +5,7 @@
   --foreground: #171717;
   --cih: 72px; /* Chat Input Height - fallback */
   /* 글래스 효과 단일 변수 */
-  --glass-bg: rgba(255, 255, 255, 0.8); /* 80% 투명 흰색 */
+  --glass-bg: rgba(255, 255, 255, 0.85); /* 85% 투명 흰색 - Chrome 호환성 향상 */
 }
 
 @theme inline {
@@ -19,7 +19,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --glass-bg: rgba(28, 28, 28, 0.8); /* Dark mode glass background */
+    --glass-bg: rgba(28, 28, 28, 0.85); /* Dark mode glass background - Chrome 호환성 */
   }
 }
 
@@ -34,14 +34,15 @@ body {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
   }
-  /* 확실한 블러 효과 - WebKit 버그 방지 최종 패치 */
+  /* 확실한 블러 효과 - Chrome/WebKit 통합 최적화 */
   .glass {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    /* 안전장치: WebKit backdrop-filter 버그 방지 */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    /* 안전장치: WebKit 버그 방지 + Chrome GPU 레이어 강제 */
+    will-change: transform;
     transform: none !important;
     isolation: auto !important;
     contain: none !important;
