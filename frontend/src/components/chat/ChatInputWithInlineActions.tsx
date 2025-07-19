@@ -103,8 +103,9 @@ export default function ChatInputWithInlineActions({
       {/* 입력 상자 컨테이너 - Grid 3-Row 레이아웃 */}
       <div
         className="grid grid-rows-[auto_1fr_auto] w-full gap-1 pointer-events-auto
-                   rounded-2xl bg-[var(--cibg)] shadow-sm border border-white/25
-                   px-4 pt-3 pb-3"
+                   rounded-2xl bg-[var(--ci-bg)] backdrop-blur-[var(--ci-blur)]
+                   shadow-input border border-white/20
+                   px-4 pt-3 pb-3 transition-colors"
       >
         {/* Textarea - Row 2 */}
         <textarea
