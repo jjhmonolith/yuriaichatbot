@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useChat } from '@/hooks/useChat';
 import MessageBubble from '@/components/chat/MessageBubble';
@@ -17,7 +17,6 @@ export default function ChatPage() {
   const { session, passageData, loading, error, sendingMessage, sendMessage } = useChat(qrCode);
   const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
-  const GAP = 16; // px
   
   // 드로어 상태 관리
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -73,17 +72,7 @@ export default function ChatPage() {
     setReference(null);
   };
 
-  // 입력창 높이에 맞춰 padding-bottom 조정
-  useLayoutEffect(() => {
-    const set = () => {
-      const h = parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue('--cih') || '0', 10);
-      if (listRef.current) listRef.current.style.paddingBottom = `${h + GAP}px`;
-    };
-    set();
-    window.addEventListener('resize', set);
-    return () => window.removeEventListener('resize', set);
-  }, []);
+  // CSS 유틸리티 .pb-safe로 대체됨 - 더 이상 필요없음
 
   // 최초 진입 + 새 메시지 → 맨 아래로 스크롤
   useEffect(() => {
@@ -137,7 +126,7 @@ export default function ChatPage() {
       {/* Chat Messages Window */}
       <div 
         ref={listRef}
-        className="flex flex-col overflow-y-auto overscroll-contain h-full max-w-4xl mx-auto w-full p-4 space-y-4 perspective-800"
+        className="flex flex-col overflow-y-auto overscroll-contain h-full pb-safe max-w-4xl mx-auto w-full p-4 space-y-4 perspective-800"
       >
           {/* Welcome Message */}
           {session.messages.length === 0 && (
@@ -179,7 +168,10 @@ export default function ChatPage() {
           )}
 
           {/* Sentinel element for auto-scroll */}
-          <div ref={endRef} className="h-px w-full" />
+          <div 
+            ref={endRef} 
+            className="h-px w-full scroll-mb-[calc(var(--cih)+16px)]" 
+          />
         </div>
 
         {/* Fixed Chat Input */}

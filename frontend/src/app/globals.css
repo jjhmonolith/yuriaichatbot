@@ -28,6 +28,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Chat Input Height 유틸리티 */
+@layer utilities {
+  .pb-safe { 
+    padding-bottom: calc(var(--cih) + 16px); 
+  }
+}
+
 /* 3D 효과 유틸리티 */
 @layer components {
   .perspective-800 { 
