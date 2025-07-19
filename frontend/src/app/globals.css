@@ -4,14 +4,8 @@
   --background: #ffffff;
   --foreground: #171717;
   --cih: 72px; /* Chat Input Height - fallback */
-  /* 입력 카드 배경: 60% 투명 흰색 */
-  --ci-bg: rgba(255, 255, 255, 0.6);
-  /* 블러 강도: 12px (필요 시 8~16으로 조정) */
-  --ci-blur: 16px;
-  /* 입력바·드로어 공통 토큰 */
-  --glass-bg: rgba(255, 255, 255, 0.75); /* 75% 투명 흰색으로 강화 */
-  --glass-blur: 16px;                     /* backdrop-blur 강도 증가 */
-  --glass-ring: rgba(255, 255, 255, 0.20); /* 테두리 컬러 */
+  /* 글래스 효과 단일 변수 */
+  --glass-bg: rgba(255, 255, 255, 0.8); /* 80% 투명 흰색 */
 }
 
 @theme inline {
@@ -25,8 +19,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --ci-bg: rgba(28, 28, 28, 0.5); /* Dark mode input background */
-    --glass-bg: rgba(28, 28, 28, 0.75); /* Dark mode glass background 강화 */
+    --glass-bg: rgba(28, 28, 28, 0.8); /* Dark mode glass background */
   }
 }
 
@@ -41,17 +34,13 @@ body {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
   }
-  /* 입력 카드용 그림자 */
-  .shadow-input { 
-    box-shadow: 0 4px 14px rgba(0,0,0,.08); 
-  }
-  /* Blur 효과 100% 보장 방식 - Tailwind JIT 우회 */
+  /* 확실한 블러 효과 - 고정값 사용으로 100% 보장 */
   .glass {
-    backdrop-filter: blur(var(--ci-blur, 14px)) saturate(180%) brightness(110%);
-    -webkit-backdrop-filter: blur(var(--ci-blur, 14px)) saturate(180%) brightness(110%);
-    background-color: rgba(255, 255, 255, 0.8); /* 투명도 80%로 강화 */
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    background: var(--glass-bg);
     border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   }
 }
 
@@ -65,21 +54,6 @@ body {
     transform-style: preserve-3d; 
   }
   
-  .glass-morphism {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  }
-  
-  .glass-morphism-dark {
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  }
 }
 
 /* 3D 회전 애니메이션 */

@@ -96,7 +96,7 @@ export default function BottomDrawer({
       <div
         ref={drawerRef}
         className="fixed bottom-0 left-0 right-0 glass rounded-t-2xl
-                   backdrop-saturate-150 z-50 transform transition-all duration-300 ease-out"
+                   z-50 transform transition-all duration-300 ease-out"
         style={{ 
           height: `${currentHeight}px`,
           transform: (isOpen && !isClosing) ? 'translateY(0)' : 'translateY(100%)'
