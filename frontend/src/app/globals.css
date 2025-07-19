@@ -34,7 +34,7 @@ body {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
   }
-  /* 확실한 블러 효과 - Chrome/WebKit 통합 최적화 */
+  /* 단계 1: 기본 glass - iOS/Safari/WebKit + Chrome(backdrop-filter 지원시) */
   .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(18px) saturate(150%);
@@ -46,6 +46,22 @@ body {
     transform: none !important;
     isolation: auto !important;
     contain: none !important;
+  }
+  
+  /* 단계 2: Blink 미지원(Chrome/Firefox) → 불투명 카드로 폴백 */
+  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+    .glass {
+      background: rgba(255, 255, 255, 0.92); /* 글씨 가림 보장 */
+    }
+  }
+  
+  /* 단계 3: Dark mode 폴백 */
+  @media (prefers-color-scheme: dark) {
+    @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+      .glass {
+        background: rgba(28, 28, 28, 0.92); /* 다크모드 폴백 */
+      }
+    }
   }
 }
 
