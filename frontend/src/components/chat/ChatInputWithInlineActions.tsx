@@ -100,9 +100,13 @@ export default function ChatInputWithInlineActions({
       onSubmit={handleSubmit}
       className="fixed bottom-0 inset-x-0 z-10 w-full px-4 pb-[calc(env(safe-area-inset-bottom)+16px)] pointer-events-none"
     >
-      {/* 입력 상자 컨테이너 */}
-      <div className="relative w-full pointer-events-auto">
-        {/* 실제 textarea + 인라인 칩 + send 버튼 */}
+      {/* 입력 상자 컨테이너 - Grid 3-Row 레이아웃 */}
+      <div
+        className="grid grid-rows-[auto_1fr_auto] w-full gap-1 pointer-events-auto
+                   rounded-2xl bg-[var(--cibg)] shadow-sm border border-white/25
+                   px-4 pt-3 pb-3"
+      >
+        {/* Textarea - Row 2 */}
         <textarea
           ref={textareaRef}
           value={message}
@@ -111,20 +115,19 @@ export default function ChatInputWithInlineActions({
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full resize-none rounded-2xl bg-[var(--cibg)] shadow-input
-                     border border-white/25 px-4 py-4 pr-14 text-[15px]
-                     focus:ring-2 focus:ring-purple-400/40 transition disabled:opacity-50
+          className="row-start-2 w-full resize-none bg-transparent focus:outline-none
+                     pr-0 text-[15px] transition disabled:opacity-50
                      text-gray-900 placeholder-gray-600"
           style={{ 
-            minHeight: '56px', 
-            maxHeight: '180px',
-            paddingTop: '2.25rem',
-            paddingBottom: '3.75rem'
+            minHeight: '48px', 
+            maxHeight: '200px',
+            paddingTop: '0',
+            paddingBottom: '0'
           }}
         />
 
-        {/* 하단 액션 바 (+지문 / +문제 / ➤ 전송) */}
-        <div className="absolute -bottom-9 left-0 right-0 flex items-center justify-between">
+        {/* 액션 바 - Row 3 */}
+        <div className="row-start-3 flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
             {/* +지문 */}
             <button 
@@ -157,23 +160,23 @@ export default function ChatInputWithInlineActions({
           </div>
 
           {/* 전송 */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!message.trim() || disabled}
-            className="w-11 h-11 rounded-full bg-gradient-to-r from-purple-500 to-pink-600
-                       flex items-center justify-center text-white
+            className="w-11 h-11 flex items-center justify-center rounded-full
+                       bg-gradient-to-r from-purple-500 to-pink-600 text-white
                        hover:from-purple-600 hover:to-pink-700 active:scale-95
-                       disabled:opacity-40 transition-all duration-200"
+                       disabled:opacity-40 transition-all"
           >
             <SendHorizontal className="w-5 h-5" />
           </button>
         </div>
 
-        {/* 선택 영역 참조 칩 (입력박스 위쪽) */}
+        {/* 참조 칩 - Row 1 */}
         {reference && (
-          <div className="absolute -top-6 left-0 flex items-center gap-1
-                          bg-blue-50 text-blue-700 rounded-md px-2 py-0.5 text-xs
-                          border border-blue-200">
+          <div className="row-start-1 text-xs flex items-center gap-1
+                          bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md w-fit
+                          border border-blue-200 whitespace-nowrap">
             <span>참조 • {reference.type}</span>
             <button 
               onClick={onClearReference} 
