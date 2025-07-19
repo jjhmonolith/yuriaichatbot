@@ -39,7 +39,7 @@ export default function MessageBubble({ message, index = 0 }: MessageBubbleProps
         <div className={`relative px-4 py-2 rounded-2xl transform-style-3d transition-all duration-300 ${
           isUser
             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md shadow-lg hover:shadow-xl hover:animate-tilt-reverse'
-            : 'bg-white/90 backdrop-blur-sm border border-white/20 text-gray-900 rounded-bl-md shadow-lg hover:shadow-xl hover:animate-tilt'
+            : 'glass text-gray-900 rounded-bl-md hover:animate-tilt'
         }`}>
           {isUser ? (
             <p className="text-sm whitespace-pre-wrap break-words">

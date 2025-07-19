@@ -156,7 +156,7 @@ export default function ChatPage() {
             <div className="flex justify-start mb-4">
               <div className="flex items-center space-x-2">
                 <Avatar mood="thinking" size="sm" />
-                <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-2xl rounded-bl-md px-4 py-2 shadow-lg">
+                <div className="glass rounded-2xl rounded-bl-md px-4 py-2">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>

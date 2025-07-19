@@ -4,8 +4,8 @@
   --background: #ffffff;
   --foreground: #171717;
   --cih: 72px; /* Chat Input Height - fallback */
-  /* 글래스 효과 단일 변수 */
-  --glass-bg: rgba(255, 255, 255, 0.85); /* 85% 투명 흰색 - Chrome 호환성 향상 */
+  /* 공통 색상(투명도 80%) */
+  --glass-bg: rgba(255, 255, 255, 0.80);
 }
 
 @theme inline {
@@ -19,7 +19,7 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --glass-bg: rgba(28, 28, 28, 0.85); /* Dark mode glass background - Chrome 호환성 */
+    --glass-bg: rgba(28, 28, 28, 0.80);
   }
 }
 
@@ -34,32 +34,32 @@ body {
   .pb-safe { 
     padding-bottom: calc(var(--cih) + 16px); 
   }
-  /* 단계 1: 기본 glass - iOS/Safari/WebKit + Chrome(backdrop-filter 지원시) */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    /* 안전장치: WebKit 버그 방지 + Chrome GPU 레이어 강제 */
-    will-change: transform;
-    transform: none !important;
-    isolation: auto !important;
-    contain: none !important;
-  }
-  
-  /* 단계 2: Blink 미지원(Chrome/Firefox) → 불투명 카드로 폴백 */
-  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  /* ❶ WebKit 계열만 대상: -webkit-backdrop-filter 지원 검사 */
+  @supports (-webkit-backdrop-filter: blur(1px)) {
     .glass {
-      background: rgba(255, 255, 255, 0.92); /* 글씨 가림 보장 */
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      backdrop-filter: blur(18px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     }
   }
-  
-  /* 단계 3: Dark mode 폴백 */
+
+  /* ❂ 미지원 브라우저(Blink·Gecko) → 불투명 카드 */
+  @supports not (-webkit-backdrop-filter: blur(1px)) {
+    .glass {
+      background: rgba(255, 255, 255, 0.95); /* 글씨 완전 가림 */
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  /* ❸ 다크모드 미지원 브라우저 폴백 */
   @media (prefers-color-scheme: dark) {
-    @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+    @supports not (-webkit-backdrop-filter: blur(1px)) {
       .glass {
-        background: rgba(28, 28, 28, 0.92); /* 다크모드 폴백 */
+        background: rgba(28, 28, 28, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
     }
   }

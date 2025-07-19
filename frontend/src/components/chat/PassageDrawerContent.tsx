@@ -154,7 +154,7 @@ export default function PassageDrawerContent({ passageData, onQuestionWithText }
               handleQuestionWithSelection(e);
             }}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-full text-sm font-medium
-                       shadow-2xl hover:bg-blue-700 transition-all duration-200 backdrop-blur-sm
+                       shadow-2xl hover:bg-blue-700 transition-all duration-200
                        border-2 border-blue-500 cursor-pointer touch-manipulation min-h-[48px]
                        hover:scale-105 active:scale-95 pointer-events-auto select-none floating-question-button"
             style={{ 
