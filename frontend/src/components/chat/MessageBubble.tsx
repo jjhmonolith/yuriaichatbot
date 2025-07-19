@@ -3,8 +3,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/lib/storage';
-import { Bot, User } from 'lucide-react';
-import Avatar from './Avatar';
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -18,59 +16,59 @@ export default function MessageBubble({ message, index = 0 }: MessageBubbleProps
     minute: '2-digit' 
   });
 
-  return (
-    <div 
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 perspective-800`}
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      <div className={`flex max-w-xs lg:max-w-md ${isUser ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2 animate-pop-in`}>
-        {/* Avatar */}
-        <div className={`flex-shrink-0 ${isUser ? 'ml-2' : 'mr-2'}`}>
-          {isUser ? (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
-              <User className="w-4 h-4 text-white" />
-            </div>
-          ) : (
-            <Avatar mood="happy" size="sm" />
-          )}
-        </div>
-
-        {/* Message */}
-        <div className={`relative px-4 py-2 rounded-2xl transform-style-3d transition-all duration-300 ${
-          isUser
-            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md shadow-lg hover:shadow-xl hover:animate-tilt-reverse'
-            : 'glass text-gray-900 rounded-bl-md hover:animate-tilt'
-        }`}>
-          {isUser ? (
-            <p className="text-sm whitespace-pre-wrap break-words">
+  if (isUser) {
+    // 학생 메시지: 말풍선 형태 유지, 아바타 제거, 공간 최적화
+    return (
+      <div 
+        className="flex justify-end mb-4 perspective-800"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
+        <div className="flex flex-col items-end max-w-sm lg:max-w-lg animate-pop-in">
+          {/* User Message Bubble */}
+          <div className="relative px-4 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-md shadow-lg hover:shadow-xl transform-style-3d transition-all duration-300 hover:animate-tilt-reverse">
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
               {message.content}
             </p>
-          ) : (
-            <div className="prose max-w-none
-              [&>h1]:!text-xl [&>h1]:!font-bold [&>h1]:!text-gray-900 [&>h1]:mb-3 [&>h1]:mt-4
-              [&>h2]:!text-lg [&>h2]:!font-bold [&>h2]:!text-gray-900 [&>h2]:mb-2 [&>h2]:mt-3  
-              [&>h3]:!text-base [&>h3]:!font-semibold [&>h3]:!text-gray-900 [&>h3]:mb-2 [&>h3]:mt-3
-              [&>h4]:!text-sm [&>h4]:!font-semibold [&>h4]:!text-gray-900 [&>h4]:mb-1 [&>h4]:mt-2
-              [&>p]:text-sm [&>p]:text-gray-900 [&>p]:mb-2 [&>p]:leading-relaxed
-              [&>strong]:font-bold [&>strong]:text-gray-900
-              [&>em]:italic [&>em]:text-gray-700
-              [&>code]:text-xs [&>code]:text-purple-600 [&>code]:bg-purple-50 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded
-              [&>ul]:text-sm [&>ul]:text-gray-900 [&>ul]:mb-2 [&>ul]:pl-6 [&>ul]:list-disc
-              [&>ol]:text-sm [&>ol]:text-gray-900 [&>ol]:mb-2 [&>ol]:pl-6 [&>ol]:list-decimal
-              [&>li]:text-gray-900 [&>li]:mb-1 [&>li]:list-item
-              [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:text-sm">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+            
+            {/* Timestamp */}
+            <div className="text-xs mt-2 text-blue-100 text-right">
+              {time}
             </div>
-          )}
-          
-          {/* Timestamp */}
-          <div className={`text-xs mt-1 ${
-            isUser ? 'text-blue-100' : 'text-gray-500'
-          }`}>
-            {time}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    // AI 응답: 말풍선 제거, 전체 너비 플레인 텍스트
+    return (
+      <div 
+        className="mb-6 animate-pop-in"
+        style={{ animationDelay: `${index * 100}ms` }}
+      >
+        {/* AI Response - Full Width Text */}
+        <div className="w-full">
+          <div className="prose max-w-none text-gray-800
+            [&>h1]:!text-xl [&>h1]:!font-bold [&>h1]:!text-gray-900 [&>h1]:mb-4 [&>h1]:mt-6
+            [&>h2]:!text-lg [&>h2]:!font-bold [&>h2]:!text-gray-900 [&>h2]:mb-3 [&>h2]:mt-5  
+            [&>h3]:!text-base [&>h3]:!font-semibold [&>h3]:!text-gray-900 [&>h3]:mb-2 [&>h3]:mt-4
+            [&>h4]:!text-sm [&>h4]:!font-semibold [&>h4]:!text-gray-900 [&>h4]:mb-2 [&>h4]:mt-3
+            [&>p]:text-base [&>p]:text-gray-800 [&>p]:mb-3 [&>p]:leading-relaxed
+            [&>strong]:font-bold [&>strong]:text-gray-900
+            [&>em]:italic [&>em]:text-gray-700
+            [&>code]:text-sm [&>code]:text-purple-600 [&>code]:bg-purple-50 [&>code]:px-2 [&>code]:py-1 [&>code]:rounded
+            [&>ul]:text-base [&>ul]:text-gray-800 [&>ul]:mb-3 [&>ul]:pl-6 [&>ul]:list-disc
+            [&>ol]:text-base [&>ol]:text-gray-800 [&>ol]:mb-3 [&>ol]:pl-6 [&>ol]:list-decimal
+            [&>li]:text-gray-800 [&>li]:mb-1 [&>li]:list-item [&>li]:leading-relaxed
+            [&>blockquote]:border-l-4 [&>blockquote]:border-purple-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-700 [&>blockquote]:bg-purple-50 [&>blockquote]:py-2 [&>blockquote]:rounded-r">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+          
+          {/* Timestamp */}
+          <div className="text-xs mt-3 text-gray-500">
+            AI 응답 • {time}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
