@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { Send, Loader2, BookOpen, HelpCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ChatInputWithButtonsProps {
@@ -30,6 +30,21 @@ export default function ChatInputWithButtons({
   const [isReferenceExpanded, setIsReferenceExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const referenceBlockRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 입력창 높이를 CSS 변수로 설정
+  useLayoutEffect(() => {
+    const setVar = (h: number) =>
+      document.documentElement.style.setProperty('--cih', `${h}px`);
+
+    const el = containerRef.current;
+    if (!el) return;
+    setVar(el.offsetHeight);
+
+    const ro = new ResizeObserver(([e]) => setVar(e.contentRect.height));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // initialMessage가 변경될 때 message state 업데이트
   useEffect(() => {
@@ -110,7 +125,10 @@ export default function ChatInputWithButtons({
   const SECB = 'pb-4';      // 행 사이 간격 16px
 
   return (
-    <div className="pt-4 glass-morphism border-t border-white/20 backdrop-blur-md">
+    <div 
+      ref={containerRef}
+      className="fixed bottom-0 inset-x-0 z-10 pt-4 bg-white/30 backdrop-blur-md border-t border-white/20"
+    >
       {/* 참조 영역 배지 */}
       {reference && (
         <div className={`flex flex-col ${SIDE} ${SECB}`}>

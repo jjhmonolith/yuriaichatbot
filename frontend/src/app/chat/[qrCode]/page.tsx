@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useChat } from '@/hooks/useChat';
 import MessageBubble from '@/components/chat/MessageBubble';
@@ -15,7 +15,9 @@ export default function ChatPage() {
   const params = useParams();
   const qrCode = params.qrCode as string;
   const { session, passageData, loading, error, sendingMessage, sendMessage } = useChat(qrCode);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const GAP = 16; // px
   
   // 드로어 상태 관리
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -71,12 +73,22 @@ export default function ChatPage() {
     setReference(null);
   };
 
-  // 메시지 추가 시 스크롤 하단으로
+  // 입력창 높이에 맞춰 padding-bottom 조정
+  useLayoutEffect(() => {
+    const set = () => {
+      const h = parseInt(getComputedStyle(document.documentElement)
+        .getPropertyValue('--cih') || '0', 10);
+      if (listRef.current) listRef.current.style.paddingBottom = `${h + GAP}px`;
+    };
+    set();
+    window.addEventListener('resize', set);
+    return () => window.removeEventListener('resize', set);
+  }, []);
+
+  // 최초 진입 + 새 메시지 → 맨 아래로 스크롤
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [session?.messages]);
+    requestAnimationFrame(() => endRef.current?.scrollIntoView({ block: 'end' }));
+  }, [session?.messages?.length]);
 
   // 로딩 상태
   if (loading) {
@@ -114,7 +126,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 relative overflow-hidden">
       {/* 배경 장식 요소들 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-float"></div>
@@ -122,10 +134,11 @@ export default function ChatPage() {
         <div className="absolute bottom-32 left-20 w-24 h-24 bg-gradient-to-r from-pink-400/20 to-purple-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="max-w-4xl mx-auto min-h-screen flex flex-col relative z-10">
-
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 perspective-800 pb-1">
+      {/* Chat Messages Window */}
+      <div 
+        ref={listRef}
+        className="flex flex-col overflow-y-auto overscroll-contain h-full max-w-4xl mx-auto w-full p-4 space-y-4 perspective-800"
+      >
           {/* Welcome Message */}
           {session.messages.length === 0 && (
             <div className="text-center py-8 animate-pop-in">
@@ -165,11 +178,12 @@ export default function ChatPage() {
             </div>
           )}
 
-          <div ref={messagesEndRef} />
+          {/* Sentinel element for auto-scroll */}
+          <div ref={endRef} className="h-px w-full" />
         </div>
 
-        {/* Chat Input with Buttons */}
-        <div className="flex-shrink-0">
+        {/* Fixed Chat Input */}
+        <div className="max-w-4xl mx-auto w-full">
           <ChatInputWithButtons
             onSend={handleSendMessage}
             onOpenPassage={openPassageDrawer}
@@ -182,7 +196,6 @@ export default function ChatPage() {
             onClearReference={handleClearReference}
           />
         </div>
-      </div>
       
       {/* Bottom Drawer */}
       <BottomDrawer
